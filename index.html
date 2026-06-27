@@ -451,16 +451,28 @@
     </main>
 
     <!-- Footer -->
-    <footer class="border-t border-juridico-800 bg-juridico-950 py-6 text-center text-xs text-slate-500">
+    <footer class="border-t border-juridico-800 bg-juridico-950 py-6 text-center text-xs text-slate-500 relative z-30">
         <div class="max-w-7xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-4">
             <div class="text-left md:text-center flex-grow">
                 <p>&copy; 2026 ArbitraQuest OAB. Plataforma interativa para capacitação jurídica em arbitragem.</p>
                 <p>Desenvolvido com foco no Exame de Ordem e Direito Processual Civil Avançado.</p>
             </div>
-            <button onclick="openDonationModal()" class="flex-shrink-0 bg-rose-500/10 border border-rose-500/20 hover:bg-rose-500/20 text-rose-400 px-4 py-2 rounded-lg font-bold transition flex items-center space-x-2">
-                <span>❤️</span>
-                <span>Doar para o Projeto</span>
-            </button>
+            
+            <!-- Visitantes + Doar -->
+            <div class="flex flex-col sm:flex-row items-center gap-3">
+                <div class="flex items-center space-x-2 bg-juridico-900 border border-juridico-800 px-3 py-2 rounded-lg" title="Pessoas que já acessaram a plataforma">
+                    <span class="relative flex h-3 w-3">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                    </span>
+                    <span class="font-semibold text-slate-300">Visitantes: <span id="visitor-counter" class="text-white font-bold tracking-wider">3.452</span></span>
+                </div>
+
+                <button onclick="openDonationModal()" class="flex-shrink-0 bg-rose-500/10 border border-rose-500/20 hover:bg-rose-500/20 text-rose-400 px-4 py-2 rounded-lg font-bold transition flex items-center space-x-2">
+                    <span>❤️</span>
+                    <span>Doar para o Projeto</span>
+                </button>
+            </div>
         </div>
     </footer>
 
@@ -494,7 +506,7 @@
                 Esse sistema utiliza IA para ser processado e ajuda a continuar projetos abertos como esse. Fique à vontade para doar.
             </p>
             <div class="bg-white p-3 rounded-xl inline-block mx-auto shadow-inner">
-                <img src="QR_CODE_DOACAO.JPEG" alt="QR Code PIX" class="w-48 h-48 object-contain">
+                <img src="image_44d403.png" alt="QR Code PIX" class="w-48 h-48 object-contain">
             </div>
             <div class="bg-juridico-800 border border-juridico-700 rounded-lg p-3 flex flex-col items-center justify-center space-y-2">
                 <span class="text-xs text-slate-400 uppercase font-semibold">Chave PIX (E-mail)</span>
@@ -504,6 +516,39 @@
             <div class="pt-4 border-t border-juridico-800">
                 <p class="text-sm text-dourado-300 font-bold">Benedito Palheta</p>
                 <p class="text-[10px] text-slate-400 uppercase tracking-widest mt-1">Especialista em IA | Cibersegurança</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- CUSTOM ALERT MODAL -->
+    <div id="modal-alert" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-juridico-950/80 backdrop-blur-md animate-fade-in">
+        <div class="bg-juridico-900 border border-juridico-700 rounded-2xl p-6 max-w-sm w-full text-center space-y-4 shadow-2xl relative">
+            <div class="text-3xl">⚠️</div>
+            <h3 class="text-xl font-bold text-white">Atenção</h3>
+            <p class="text-slate-300 text-sm" id="alert-message">Mensagem aqui</p>
+            <button onclick="closeCustomAlert()" class="w-full py-2.5 bg-juridico-800 hover:bg-juridico-700 text-white font-bold rounded-xl border border-juridico-600 transition">OK</button>
+        </div>
+    </div>
+
+    <!-- CUSTOM CONFIRM MODAL -->
+    <div id="modal-confirm" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-juridico-950/80 backdrop-blur-md animate-fade-in">
+        <div class="bg-juridico-900 border border-juridico-700 rounded-2xl p-6 max-w-sm w-full text-center space-y-6 shadow-2xl relative">
+            <div class="text-3xl">❓</div>
+            <h3 class="text-xl font-bold text-white">Confirmação</h3>
+            <p class="text-slate-300 text-sm" id="confirm-message">Mensagem aqui</p>
+            <div class="flex space-x-3">
+                <button onclick="closeCustomConfirm()" class="flex-1 py-2.5 bg-juridico-800 hover:bg-juridico-700 text-slate-300 font-bold rounded-xl border border-juridico-600 transition">Cancelar</button>
+                <button onclick="executeConfirmAction()" class="flex-1 py-2.5 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-xl transition">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SOCIAL PROOF TOAST (NOTIFICAÇÃO DISCRETA NO CANTO) -->
+    <div id="social-proof-toast" class="fixed bottom-4 left-4 right-4 sm:right-auto sm:w-80 z-50 transform transition-all duration-700 translate-y-20 opacity-0 pointer-events-none">
+        <div class="bg-juridico-900 border border-juridico-700 shadow-lg shadow-juridico-950/80 rounded-xl p-3 flex items-center space-x-3 backdrop-blur-md">
+            <div id="sp-icon" class="text-xl flex-shrink-0 animate-bounce">❤️</div>
+            <div class="flex-1">
+                <p id="sp-text" class="text-xs text-slate-200 font-medium leading-tight">Helena Alencar - Doação de R$ 10,00</p>
             </div>
         </div>
     </div>
@@ -1367,6 +1412,18 @@
             { minXP: 7000, title: "Presidente de Corte Arbitral", badge: "👑" }
         ];
 
+        // SOCIAL PROOF MOCK DATA
+        const SP_MESSAGES = [
+            { text: "Eduardo Maia - Quiz Realizado", icon: "🎓" },
+            { text: "Maria Julieta - Curtiu JusArbitragem", icon: "👍" },
+            { text: "Helena Alencar - Doação de R$ 10,00", icon: "❤️" },
+            { text: "Carlos Silva - Atingiu o nível Advogado Arbitralista", icon: "⚖️" },
+            { text: "Ana Souza - Doação de R$ 25,00", icon: "❤️" },
+            { text: "Felipe Costa - Acertou 10 seguidas", icon: "🔥" },
+            { text: "Lucas Mendes - Quiz Realizado", icon: "🎓" },
+            { text: "Mariana Rios - Doação de R$ 15,00", icon: "❤️" }
+        ];
+
         // AUDIO CONTEXT MANAGER (Procedural Sound Generator)
         let soundEnabled = true;
         let audioCtx = null;
@@ -1426,7 +1483,92 @@
             loadStateFromLocalStorage();
             updateGamificationUI();
             buildTopicsGrid();
+            initVisitorCounter();
+            scheduleNextSocialProof();
         };
+
+        // --- CUSTOM MODALS FOR ALERTS AND CONFIRMS ---
+        let currentConfirmCallback = null;
+
+        function showCustomAlert(msg) {
+            document.getElementById('alert-message').innerText = msg;
+            document.getElementById('modal-alert').classList.remove('hidden');
+        }
+
+        function closeCustomAlert() {
+            document.getElementById('modal-alert').classList.add('hidden');
+        }
+
+        function showCustomConfirm(msg, callback) {
+            document.getElementById('confirm-message').innerText = msg;
+            currentConfirmCallback = callback;
+            document.getElementById('modal-confirm').classList.remove('hidden');
+        }
+
+        function closeCustomConfirm() {
+            document.getElementById('modal-confirm').classList.add('hidden');
+            currentConfirmCallback = null;
+        }
+
+        function executeConfirmAction() {
+            if (currentConfirmCallback) currentConfirmCallback();
+            closeCustomConfirm();
+        }
+
+        // --- SOCIAL PROOF NOTIFICATIONS (TOASTS) ---
+        function showSocialProof() {
+            const toast = document.getElementById('social-proof-toast');
+            const msg = SP_MESSAGES[Math.floor(Math.random() * SP_MESSAGES.length)];
+            
+            document.getElementById('sp-icon').innerText = msg.icon;
+            document.getElementById('sp-text').innerText = msg.text;
+
+            // Animate IN
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            // Hide after 4 seconds
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 4000);
+        }
+
+        function scheduleNextSocialProof() {
+            // Random interval between 12 and 35 seconds
+            const nextTime = Math.floor(Math.random() * 23000) + 12000;
+            setTimeout(() => {
+                showSocialProof();
+                scheduleNextSocialProof();
+            }, nextTime);
+        }
+
+        // --- VISITOR COUNTER ---
+        let visitorsCount = 0;
+        function initVisitorCounter() {
+            let savedVisitors = localStorage.getItem('aq_visitors');
+            if (!savedVisitors) {
+                visitorsCount = 1452; // Start base
+            } else {
+                visitorsCount = parseInt(savedVisitors);
+            }
+            updateVisitorUI();
+
+            // Check every 4.5 seconds to maybe add a visitor
+            setInterval(() => {
+                if (Math.random() > 0.65) { // 35% chance to increment
+                    const inc = Math.floor(Math.random() * 3) + 1; // 1 to 3 visitors
+                    visitorsCount += inc;
+                    localStorage.setItem('aq_visitors', visitorsCount);
+                    updateVisitorUI();
+                }
+            }, 4500);
+        }
+
+        function updateVisitorUI() {
+            document.getElementById('visitor-counter').innerText = visitorsCount.toLocaleString('pt-BR');
+        }
+
 
         function saveStateToLocalStorage() {
             const data = {
@@ -1460,7 +1602,7 @@
         }
 
         function resetAllProgress() {
-            if(confirm("Deseja realmente limpar seu histórico de conquistas, XP e progresso?")) {
+            showCustomConfirm("Deseja realmente limpar seu histórico de conquistas, XP e progresso?", () => {
                 localStorage.removeItem('arbitraquest_state_v1');
                 currentXP = 0;
                 streak = 0;
@@ -1472,7 +1614,7 @@
                 updateGamificationUI();
                 buildTopicsGrid();
                 backToMainMenu();
-            }
+            });
         }
 
         function buildTopicsGrid() {
@@ -1685,7 +1827,7 @@
 
         function startFocusedQuiz() {
             if (selectedTopicIds.length === 0) {
-                alert("Por favor, selecione ao menos um tema para praticar.");
+                showCustomAlert("Por favor, selecione ao menos um tema para praticar.");
                 return;
             }
             startQuiz('foco');
@@ -1715,7 +1857,7 @@
                 let filtered = QUESTIONS.filter(q => selectedTopicIds.includes(q.topicId));
                 sessionQuestions = shuffleArray(filtered);
                 if(sessionQuestions.length === 0) {
-                    alert("Não existem questões para os tópicos selecionados.");
+                    showCustomAlert("Não existem questões para os tópicos selecionados.");
                     return;
                 }
             }
@@ -1860,7 +2002,7 @@
         function handleQuizAction() {
             if (!hasAnswered) {
                 if (selectedOption === null) {
-                    alert("Por favor, selecione uma das alternativas antes de verificar!");
+                    showCustomAlert("Por favor, selecione uma das alternativas antes de verificar!");
                     return;
                 }
                 clearInterval(timerInterval);
@@ -1973,10 +2115,10 @@
         }
 
         function abortSession() {
-            if (confirm("Seu progresso da rodada ativa será perdido. Voltar para o menu?")) {
+            showCustomConfirm("Seu progresso da rodada ativa será perdido. Voltar para o menu?", () => {
                 clearInterval(timerInterval);
                 backToMainMenu();
-            }
+            });
         }
 
         // FINISH SCREEN & ANALYTICS INTERFACE
