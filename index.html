@@ -1,0 +1,2127 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ArbitraQuest OAB - Quiz Gamificado de Arbitragem</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        juridico: {
+                            50: '#f4f6fa',
+                            100: '#e9edf5',
+                            200: '#c8d4e7',
+                            300: '#9cb1d4',
+                            400: '#6889be',
+                            500: '#4368a5',
+                            600: '#325087',
+                            700: '#273f6b',
+                            800: '#1b2d4e',
+                            900: '#111e35',
+                            950: '#0a1222'
+                        },
+                        dourado: {
+                            50: '#fbf8eb',
+                            100: '#f5edcb',
+                            200: '#ebda96',
+                            300: '#dfc259',
+                            400: '#d5aa31',
+                            500: '#b88b21',
+                            600: '#9a6c1a',
+                            700: '#7c5017',
+                            800: '#644118',
+                            900: '#523418',
+                            950: '#301c0b'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        h1, h2, .font-serif {
+            font-family: 'Cinzel', serif;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #111e35;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #b88b21;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #9a6c1a;
+        }
+    </style>
+</head>
+<body class="bg-juridico-950 text-slate-100 min-h-screen flex flex-col justify-between selection:bg-dourado-500 selection:text-juridico-950">
+
+    <!-- Header / Navbar -->
+    <header class="border-b border-juridico-800 bg-juridico-900/80 backdrop-blur-md sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="backToMainMenu()">
+                <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-dourado-400 to-dourado-600 flex items-center justify-center shadow-lg shadow-dourado-500/20">
+                    <!-- Balance/Scale SVG -->
+                    <svg class="w-6 h-6 text-juridico-950" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m0-11.314l.707.707m11.314 11.314l.707-.707M12 5a7 7 0 100 14 7 7 0 000-14z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3" />
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-xl md:text-2xl font-bold tracking-wider text-dourado-400">ARBITRA<span class="text-white">QUEST</span></h1>
+                    <p class="text-xs text-slate-400 uppercase tracking-widest hidden sm:block">Lei de Arbitragem &bull; OAB</p>
+                </div>
+            </div>
+
+            <!-- Header Gamification Widgets -->
+            <div class="flex items-center space-x-4">
+                <!-- User Level & XP -->
+                <div class="bg-juridico-800/80 border border-juridico-700 rounded-full px-4 py-1.5 hidden md:flex items-center space-x-3">
+                    <span class="text-xs font-semibold text-dourado-300 uppercase" id="hdr-level-name">Estagiário</span>
+                    <div class="w-24 bg-juridico-950 rounded-full h-2 overflow-hidden">
+                        <div class="bg-gradient-to-r from-dourado-400 to-dourado-600 h-full" id="hdr-xp-progress" style="width: 10%"></div>
+                    </div>
+                    <span class="text-xs text-slate-300" id="hdr-xp-text">0/500 XP</span>
+                </div>
+
+                <!-- Streak -->
+                <div class="flex items-center bg-amber-500/10 border border-amber-500/20 rounded-full px-3 py-1 text-amber-400" title="Acertos seguidos!">
+                    <span class="text-lg mr-1">🔥</span>
+                    <span class="font-bold text-sm" id="hdr-streak">0</span>
+                </div>
+
+                <!-- Botão Doar (Header) -->
+                <button onclick="openDonationModal()" class="hidden sm:flex items-center space-x-2 bg-rose-500/10 border border-rose-500/20 hover:bg-rose-500/20 text-rose-400 px-3 py-1.5 rounded-full transition" title="Apoie o Projeto">
+                    <span>❤️</span>
+                    <span class="text-xs font-bold uppercase tracking-wider">Doar</span>
+                </button>
+
+                <!-- Sound Toggle -->
+                <button onclick="toggleSound()" class="p-2 rounded-lg bg-juridico-800 border border-juridico-700 text-slate-400 hover:text-dourado-400 transition" id="btn-sound" title="Alternar som">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" id="sound-icon-on">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072M18.364 5.636a9 9 0 010 12.728M12 18.75V5.25L7.75 9.5H4.5v5h3.25L12 18.75z" />
+                    </svg>
+                    <svg class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" id="sound-icon-off">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 14l4-4m0 4l-4-4" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 py-8 relative">
+
+        <!-- 1. MAIN MENU VIEW -->
+        <section id="view-menu" class="space-y-8 animate-fade-in">
+            <!-- Welcome Hero -->
+            <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-juridico-900 via-juridico-800 to-juridico-950 border border-juridico-800 p-8 shadow-xl">
+                <!-- Decorative scales in background -->
+                <div class="absolute right-0 bottom-0 opacity-5 transform translate-y-12 translate-x-12 pointer-events-none">
+                    <svg class="w-96 h-96" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2h2v1.93zm6.9-2.53c-.26-.81-1-1.4-1.9-1.4h-1v-3c0-.55-.45-1-1-1h-6v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.4z" />
+                    </svg>
+                </div>
+
+                <div class="max-w-3xl space-y-4">
+                    <span class="inline-block px-3 py-1 rounded-full bg-dourado-500/15 border border-dourado-500/35 text-dourado-400 text-xs font-bold uppercase tracking-widest">Exame da OAB Facilitado</span>
+                    <h2 class="text-3xl md:text-5xl font-extrabold text-white tracking-tight leading-tight">Domine a Lei de Arbitragem com Gamificação</h2>
+                    <p class="text-slate-300 text-base md:text-lg">
+                        Preparamos um banco de dados premium contendo **60 questões inéditas baseadas em casos práticos e provas reais da OAB**, abrangendo com precisão cirúrgica os principais artigos da Lei 9.307/1996.
+                    </p>
+                </div>
+            </div>
+
+            <!-- User Level Progress Card (Mobile & Tablet highlight) -->
+            <div class="bg-juridico-900 border border-juridico-800 rounded-xl p-5 shadow-lg flex flex-col md:hidden space-y-4">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <span class="text-xs text-slate-400 uppercase block">Seu Nível Atual</span>
+                        <span class="text-lg font-bold text-dourado-400" id="m-level-name">Estagiário</span>
+                    </div>
+                    <span class="text-2xl">🎓</span>
+                </div>
+                <div class="w-full bg-juridico-950 rounded-full h-3 overflow-hidden">
+                    <div class="bg-gradient-to-r from-dourado-400 to-dourado-600 h-full" id="m-xp-progress" style="width: 10%"></div>
+                </div>
+                <div class="flex justify-between text-xs text-slate-400">
+                    <span id="m-xp-text">0 / 500 XP</span>
+                    <span id="m-next-level">Falta 500 XP para o próximo nível</span>
+                </div>
+            </div>
+
+            <!-- Game Modes -->
+            <div class="space-y-4">
+                <h3 class="text-xl font-bold text-dourado-300 border-b border-juridico-800 pb-2">Escolha seu Modo de Jogo</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Simulado Completo -->
+                    <div onclick="startQuiz('completo')" class="group cursor-pointer bg-gradient-to-b from-juridico-900 to-juridico-950 border border-juridico-800 hover:border-dourado-500 rounded-xl p-6 transition-all transform hover:-translate-y-1 shadow-lg flex flex-col justify-between">
+                        <div class="space-y-3">
+                            <div class="w-12 h-12 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-400 group-hover:bg-emerald-500/20 transition">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                            <h4 class="text-lg font-bold text-white group-hover:text-dourado-400 transition">Maratona de Arbitragem</h4>
+                            <p class="text-slate-400 text-sm">Responda a todas as 60 questões em sequência para testar sua resistência jurídica.</p>
+                        </div>
+                        <div class="mt-6 flex justify-between items-center text-xs font-semibold text-emerald-400">
+                            <span>60 Questões</span>
+                            <span class="group-hover:translate-x-1 transition-transform">Iniciar Desafio &rarr;</span>
+                        </div>
+                    </div>
+
+                    <!-- Desafio Rápido -->
+                    <div onclick="startQuiz('rapido')" class="group cursor-pointer bg-gradient-to-b from-juridico-900 to-juridico-950 border border-juridico-800 hover:border-dourado-500 rounded-xl p-6 transition-all transform hover:-translate-y-1 shadow-lg flex flex-col justify-between">
+                        <div class="space-y-3">
+                            <div class="w-12 h-12 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-400 group-hover:bg-amber-500/20 transition">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                </svg>
+                            </div>
+                            <h4 class="text-lg font-bold text-white group-hover:text-dourado-400 transition">Simulado Expresso</h4>
+                            <p class="text-slate-400 text-sm">Uma rodada rápida de 10 questões aleatórias e diversificadas. Ideal para revisar rapidamente.</p>
+                        </div>
+                        <div class="mt-6 flex justify-between items-center text-xs font-semibold text-amber-400">
+                            <span>10 Questões</span>
+                            <span class="group-hover:translate-x-1 transition-transform">Iniciar Quiz &rarr;</span>
+                        </div>
+                    </div>
+
+                    <!-- Modo Foco -->
+                    <div onclick="openTopicSelector()" class="group cursor-pointer bg-gradient-to-b from-juridico-900 to-juridico-950 border border-juridico-800 hover:border-dourado-500 rounded-xl p-6 transition-all transform hover:-translate-y-1 shadow-lg flex flex-col justify-between">
+                        <div class="space-y-3">
+                            <div class="w-12 h-12 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-400 group-hover:bg-indigo-500/20 transition">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                                </svg>
+                            </div>
+                            <h4 class="text-lg font-bold text-white group-hover:text-dourado-400 transition">Modo Estudo Temático</h4>
+                            <p class="text-slate-400 text-sm">Foque em artigos específicos que você possui maior dificuldade ou quer aprofundar.</p>
+                        </div>
+                        <div class="mt-6 flex justify-between items-center text-xs font-semibold text-indigo-400">
+                            <span>Foco em Artigos</span>
+                            <span class="group-hover:translate-x-1 transition-transform">Escolher Tópicos &rarr;</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Topics Overview Grid -->
+            <div class="space-y-4">
+                <h3 class="text-xl font-bold text-dourado-300 border-b border-juridico-800 pb-2">Ementa dos Temas Praticados</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" id="menu-topics-grid">
+                    <!-- Populated dynamically via JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. TOPIC SELECTOR MODAL VIEW -->
+        <section id="view-topic-selector" class="hidden max-w-4xl mx-auto space-y-6 animate-fade-in">
+            <div class="bg-juridico-900 border border-juridico-800 rounded-2xl p-6 shadow-xl space-y-6">
+                <div class="flex items-center justify-between border-b border-juridico-800 pb-4">
+                    <div>
+                        <h3 class="text-2xl font-bold text-white">Treinamento Direcionado</h3>
+                        <p class="text-slate-400 text-sm mt-1">Selecione um ou mais temas que deseja estudar.</p>
+                    </div>
+                    <button onclick="backToMainMenu()" class="text-slate-400 hover:text-white transition">&larr; Voltar ao Menu</button>
+                </div>
+
+                <!-- Topic selection list -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[400px] overflow-y-auto pr-2" id="selector-topics-list">
+                    <!-- Populated dynamically -->
+                </div>
+
+                <div class="flex flex-col sm:flex-row justify-between items-center gap-4 pt-4 border-t border-juridico-800">
+                    <div class="flex space-x-3">
+                        <button onclick="toggleSelectAllTopics(true)" class="text-xs text-dourado-400 hover:underline">Selecionar Todos</button>
+                        <span class="text-slate-600">|</span>
+                        <button onclick="toggleSelectAllTopics(false)" class="text-xs text-slate-400 hover:underline">Limpar Seleção</button>
+                    </div>
+                    <button onclick="startFocusedQuiz()" class="w-full sm:w-auto px-8 py-3 bg-gradient-to-r from-dourado-500 to-dourado-600 hover:from-dourado-400 hover:to-dourado-500 text-juridico-950 font-bold rounded-xl shadow-lg transition-all flex items-center justify-center space-x-2">
+                        <span>Iniciar com Selecionados</span>
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. ACTIVE QUIZ PLAY VIEW -->
+        <section id="view-quiz" class="hidden max-w-4xl mx-auto space-y-6 animate-fade-in">
+            <!-- Header of Quiz (Progress, Timer, Score) -->
+            <div class="bg-juridico-900 border border-juridico-800 rounded-xl p-4 flex flex-wrap items-center justify-between gap-4 shadow-lg">
+                <div class="flex items-center space-x-3">
+                    <span class="w-8 h-8 rounded-full bg-juridico-800 border border-juridico-700 flex items-center justify-center text-xs font-bold text-dourado-400" id="quiz-question-index">1</span>
+                    <div class="text-xs">
+                        <span class="text-slate-400 block uppercase font-semibold">Questão</span>
+                        <span class="text-slate-200 font-bold" id="quiz-progress-text">1 de 10</span>
+                    </div>
+                </div>
+
+                <!-- Active Progress Bar -->
+                <div class="flex-grow max-w-xs md:max-w-md bg-juridico-950 rounded-full h-3 overflow-hidden">
+                    <div class="bg-gradient-to-r from-dourado-400 to-dourado-600 h-full transition-all duration-300" id="quiz-progress-bar" style="width: 10%"></div>
+                </div>
+
+                <!-- Timer & Score -->
+                <div class="flex items-center space-x-4">
+                    <!-- Timer -->
+                    <div class="flex items-center space-x-2 bg-juridico-950 border border-juridico-800 rounded-lg px-3 py-1.5" id="timer-box">
+                        <span class="text-amber-500 font-bold text-sm" id="quiz-timer">30s</span>
+                    </div>
+
+                    <!-- Points -->
+                    <div class="bg-gradient-to-r from-juridico-800 to-juridico-750 border border-juridico-700 rounded-lg px-3 py-1.5">
+                        <span class="text-slate-400 text-[10px] block uppercase font-bold tracking-wider">Pontuação</span>
+                        <span class="text-white font-black text-sm" id="quiz-score">0 XP</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Question & Topic Container -->
+            <div class="bg-juridico-900 border border-juridico-800 rounded-2xl p-6 md:p-8 shadow-xl space-y-6">
+                <!-- Topic Label -->
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                    <span class="px-3 py-1 rounded-full bg-dourado-500/10 border border-dourado-500/20 text-dourado-400 text-xs font-bold uppercase tracking-wider" id="quiz-question-topic">Tópico: Direitos Patrimoniais</span>
+                    <span class="text-xs text-slate-500 font-semibold" id="quiz-question-ref">Artigo 1º, Lei 9.307/96</span>
+                </div>
+
+                <!-- Statement / Question Case Scenario -->
+                <div class="space-y-3">
+                    <p class="text-slate-100 text-base md:text-lg leading-relaxed font-medium" id="quiz-question-text">
+                        Enunciado detalhado com caso simulado da prova da OAB.
+                    </p>
+                    
+                    <!-- FALA MESTRE (DICA) BUTTON AND BOX -->
+                    <div class="flex justify-end pt-2">
+                        <button id="btn-hint" onclick="showHint()" class="text-xs text-dourado-400 hover:text-dourado-300 hover:bg-dourado-500/20 flex items-center space-x-1 border border-dourado-500/30 bg-dourado-500/10 px-3 py-1.5 rounded-full transition-colors focus:outline-none">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                            </svg>
+                            <span class="font-bold uppercase tracking-wider">Fala Mestre</span>
+                        </button>
+                    </div>
+                    
+                    <!-- DICA TEXT BOX (Hidden by default) -->
+                    <div id="quiz-hint-box" class="hidden mt-2 p-4 rounded-xl border border-indigo-500/40 bg-indigo-900/30 shadow-inner">
+                        <div class="flex items-start space-x-3">
+                            <div class="text-indigo-400 mt-0.5">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                                </svg>
+                            </div>
+                            <div>
+                                <span class="block text-xs font-bold text-indigo-400 uppercase mb-1">Dica Jurídica</span>
+                                <p class="text-sm text-indigo-100 leading-relaxed font-medium" id="quiz-hint-text">
+                                    Aqui vai a dica baseada no artigo de lei.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Alternatives -->
+                <div class="space-y-3" id="quiz-options-container">
+                    <!-- Populated dynamically (Button/Cards style) -->
+                </div>
+
+                <!-- Feedback Area (Initially Hidden) -->
+                <div id="quiz-feedback" class="hidden rounded-xl p-5 border transition-all duration-300 space-y-3">
+                    <div class="flex items-center space-x-2">
+                        <span class="text-2xl" id="quiz-feedback-icon">✅</span>
+                        <h4 class="text-lg font-bold" id="quiz-feedback-title">Resposta Correta!</h4>
+                    </div>
+                    <p class="text-sm leading-relaxed" id="quiz-feedback-explanation">
+                        Explicação detalhada comentando o artigo da lei e o porquê do gabarito.
+                    </p>
+                </div>
+
+                <!-- Navigation Controls -->
+                <div class="flex justify-between items-center pt-4 border-t border-juridico-800">
+                    <button onclick="abortSession()" class="text-xs text-rose-400 hover:text-rose-300 hover:underline transition">Abandonar Quiz</button>
+                    <button id="btn-quiz-action" onclick="handleQuizAction()" class="px-8 py-3 bg-gradient-to-r from-dourado-500 to-dourado-600 hover:from-dourado-400 hover:to-dourado-500 text-juridico-950 font-bold rounded-xl shadow-lg transition-all flex items-center space-x-2">
+                        <span>Verificar Gabarito</span>
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 1.414L10.586 9H7a1 1 0 100 2h3.586l-1.293 1.293a1 1 0 101.414 1.414l3-3a1 1 0 000-1.414z" clip-rule="evenodd" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. RESULTS / SUMMARY VIEW -->
+        <section id="view-results" class="hidden max-w-5xl mx-auto space-y-8 animate-fade-in">
+            <!-- Trophy & Overview Card -->
+            <div class="bg-gradient-to-r from-juridico-900 to-juridico-950 border border-juridico-800 rounded-2xl p-8 shadow-xl text-center space-y-6 relative overflow-hidden">
+                <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-dourado-500/10 via-transparent to-transparent pointer-events-none"></div>
+
+                <div class="inline-flex w-20 h-20 rounded-full bg-dourado-500/15 border-2 border-dourado-400 items-center justify-center text-4xl mb-2 animate-bounce">
+                    🏆
+                </div>
+
+                <h2 class="text-3xl md:text-5xl font-extrabold text-white">Excelente Esforço!</h2>
+                <p class="text-slate-300 max-w-xl mx-auto text-sm md:text-base">
+                    Você concluiu sua rodada de estudos e acumulou novos conhecimentos sobre a Lei de Arbitragem! Veja o sumário do seu desempenho.
+                </p>
+
+                <!-- Key Metrics Grid -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto pt-4">
+                    <div class="bg-juridico-800/80 border border-juridico-700 rounded-xl p-4">
+                        <span class="text-xs text-slate-400 uppercase block font-semibold mb-1">Aproveitamento</span>
+                        <span class="text-2xl md:text-3xl font-black text-dourado-400" id="res-accuracy">0%</span>
+                    </div>
+                    <div class="bg-juridico-800/80 border border-juridico-700 rounded-xl p-4">
+                        <span class="text-xs text-slate-400 uppercase block font-semibold mb-1">Acertos</span>
+                        <span class="text-2xl md:text-3xl font-black text-white" id="res-score">0 / 10</span>
+                    </div>
+                    <div class="bg-juridico-800/80 border border-juridico-700 rounded-xl p-4">
+                        <span class="text-xs text-slate-400 uppercase block font-semibold mb-1">XP Conquistado</span>
+                        <span class="text-2xl md:text-3xl font-black text-emerald-400" id="res-xp-gained">+0 XP</span>
+                    </div>
+                    <div class="bg-juridico-800/80 border border-juridico-700 rounded-xl p-4">
+                        <span class="text-xs text-slate-400 uppercase block font-semibold mb-1">Melhor Combo</span>
+                        <span class="text-2xl md:text-3xl font-black text-amber-500" id="res-max-streak">0 🔥</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dashboard Analytics: Topic Breakdown -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- SVG Topic Chart / List -->
+                <div class="bg-juridico-900 border border-juridico-800 rounded-2xl p-6 shadow-xl space-y-4 md:col-span-2">
+                    <h3 class="text-xl font-bold text-white flex items-center space-x-2">
+                        <span>Análise Estatística por Artigo</span>
+                    </h3>
+                    <p class="text-xs text-slate-400">Verifique os tópicos onde você possui melhor desempenho e os que necessitam de mais atenção.</p>
+
+                    <div class="space-y-4 max-h-[350px] overflow-y-auto pr-2" id="res-topics-breakdown">
+                        <!-- Populated dynamically via JS -->
+                    </div>
+                </div>
+
+                <!-- Gamification Achievements Card -->
+                <div class="bg-juridico-900 border border-juridico-800 rounded-2xl p-6 shadow-xl space-y-4">
+                    <h3 class="text-xl font-bold text-white">Conquistas Desbloqueadas</h3>
+                    <div class="space-y-3" id="res-achievements">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Review & Action Buttons -->
+            <div class="flex flex-col sm:flex-row justify-center items-center gap-4">
+                <button onclick="backToMainMenu()" class="w-full sm:w-auto px-8 py-3.5 bg-juridico-800 hover:bg-juridico-700 border border-juridico-700 rounded-xl font-bold text-white transition flex items-center justify-center space-x-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                    </svg>
+                    <span>Menu Principal</span>
+                </button>
+                <button id="btn-review-mistakes" onclick="startMistakesReview()" class="w-full sm:w-auto px-8 py-3.5 bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-500/30 rounded-xl font-bold text-indigo-300 transition flex items-center justify-center space-x-2">
+                    <span>Rever Erros da Rodada</span>
+                </button>
+                <button onclick="restartCurrentQuizMode()" class="w-full sm:w-auto px-8 py-3.5 bg-gradient-to-r from-dourado-500 to-dourado-600 hover:from-dourado-400 hover:to-dourado-500 text-juridico-950 font-bold rounded-xl shadow-lg transition-all flex items-center justify-center space-x-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 15.191M15.5 8.5L20 13m0 0l-4.5 4.5M20 13h-8" />
+                    </svg>
+                    <span>Jogar Novamente</span>
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-juridico-800 bg-juridico-950 py-6 text-center text-xs text-slate-500">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="text-left md:text-center flex-grow">
+                <p>&copy; 2026 ArbitraQuest OAB. Plataforma interativa para capacitação jurídica em arbitragem.</p>
+                <p>Desenvolvido com foco no Exame de Ordem e Direito Processual Civil Avançado.</p>
+            </div>
+            <button onclick="openDonationModal()" class="flex-shrink-0 bg-rose-500/10 border border-rose-500/20 hover:bg-rose-500/20 text-rose-400 px-4 py-2 rounded-lg font-bold transition flex items-center space-x-2">
+                <span>❤️</span>
+                <span>Doar para o Projeto</span>
+            </button>
+        </div>
+    </footer>
+
+    <!-- LEVEL UP CUSTOM MODAL DIALOG -->
+    <div id="modal-level-up" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-juridico-950/80 backdrop-blur-md animate-fade-in">
+        <div class="bg-gradient-to-b from-juridico-900 to-juridico-950 border-2 border-dourado-400 rounded-2xl p-8 max-w-md w-full text-center space-y-6 shadow-2xl relative">
+            <!-- Confetti visual background -->
+            <div class="text-6xl animate-bounce">🎓✨</div>
+            <h3 class="text-2xl md:text-3xl font-extrabold text-dourado-400">PROMOÇÃO DE NÍVEL!</h3>
+            <p class="text-slate-300">Seu prestígio na advocacia arbitral acaba de subir!</p>
+            <div class="bg-juridico-800 border border-juridico-700 rounded-lg p-4">
+                <span class="text-xs text-slate-400 uppercase block">Novo Título Jurídico</span>
+                <span class="text-xl font-bold text-white" id="lvl-up-new-title">Advogado Arbitralista</span>
+            </div>
+            <p class="text-xs text-dourado-300 font-semibold italic">"Uma reputação brilhante requer diligência contínua."</p>
+            <button onclick="closeLevelUpModal()" class="w-full py-3 bg-gradient-to-r from-dourado-500 to-dourado-600 text-juridico-950 font-bold rounded-xl shadow-lg hover:from-dourado-400 hover:to-dourado-500 transition">
+                Continuar Jornada
+            </button>
+        </div>
+    </div>
+
+    <!-- DONATION CUSTOM MODAL DIALOG -->
+    <div id="modal-donation" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-juridico-950/80 backdrop-blur-md animate-fade-in">
+        <div class="bg-gradient-to-b from-juridico-900 to-juridico-950 border border-juridico-700 rounded-2xl p-6 md:p-8 max-w-sm w-full text-center space-y-6 shadow-2xl relative">
+            <button onclick="closeDonationModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white transition">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            <div class="text-4xl animate-pulse">❤️</div>
+            <h3 class="text-2xl font-extrabold text-dourado-400">Apoie o Projeto</h3>
+            <p class="text-slate-300 text-sm leading-relaxed">
+                Esse sistema utiliza IA para ser processado e ajuda a continuar projetos abertos como esse. Fique à vontade para doar.
+            </p>
+            <div class="bg-white p-3 rounded-xl inline-block mx-auto shadow-inner">
+                <img src="image_44d403.png" alt="QR Code PIX" class="w-48 h-48 object-contain">
+            </div>
+            <div class="bg-juridico-800 border border-juridico-700 rounded-lg p-3 flex flex-col items-center justify-center space-y-2">
+                <span class="text-xs text-slate-400 uppercase font-semibold">Chave PIX (E-mail)</span>
+                <span class="text-white font-bold tracking-wide select-all" id="pix-key">financeiro@edupam.com.br</span>
+                <button onclick="copyPix(this)" class="text-xs bg-juridico-700 hover:bg-juridico-600 text-slate-200 px-3 py-2 rounded transition w-full font-semibold">Copiar Chave PIX</button>
+            </div>
+            <div class="pt-4 border-t border-juridico-800">
+                <p class="text-sm text-dourado-300 font-bold">Benedito Palheta</p>
+                <p class="text-[10px] text-slate-400 uppercase tracking-widest mt-1">Especialista em IA | Cibersegurança</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- SOUND MANAGER & GAMEPLAY SCRIPTS -->
+    <script>
+        // 12 TOPICS DATA STRUCTURE
+        const TOPICS = {
+            1: { id: 1, name: "Direitos Patrimoniais Disponíveis", ref: "Art. 1º", icon: "⚖️" },
+            2: { id: 2, name: "Convenção de Arbitragem", ref: "Arts. 3º ao 8º", icon: "📜" },
+            3: { id: 3, name: "Árbitro & Impedimentos", ref: "Art. 13", icon: "👨‍⚖️" },
+            4: { id: 4, name: "Status: Juiz de Fato e de Direito", ref: "Art. 18", icon: "📖" },
+            5: { id: 5, name: "Princípios do Procedimento", ref: "Art. 21", icon: "🤝" },
+            6: { id: 6, name: "Tutelas Provisórias & Carta Arbitral", ref: "Arts. 22-A a 22-C", icon: "✉️" },
+            7: { id: 7, name: "Prazo da Sentença Arbitral", ref: "Art. 23", icon: "⏱️" },
+            8: { id: 8, name: "Requisitos da Sentença", ref: "Art. 26", icon: "✏️" },
+            9: { id: 9, name: "Efeitos da Sentença Arbitral", ref: "Art. 31", icon: "🔨" },
+            10: { id: 10, name: "Hipóteses de Nulidade", ref: "Art. 32", icon: "❌" },
+            11: { id: 11, name: "Ação Anulatória (Decadência)", ref: "Art. 33", icon: "📅" },
+            12: { id: 12, name: "Sentença Estrangeira & STJ", ref: "Art. 35", icon: "🌐" }
+        };
+
+        // 60 REALISTIC OAB QUESTIONS DATABASE (5 QUESTIONS PER TOPIC)
+        const QUESTIONS = [
+            // T1: Direitos Patrimoniais Disponíveis (Art. 1º)
+            {
+                topicId: 1,
+                text: "A concessionária de rodovias ViaLeste S/A e o Estado de Minas Gerais celebram contrato de concessão que contém cláusula compromissória arbitral. Diante de divergência sobre o reequilíbrio econômico-financeiro do contrato, a concessionária decide instaurar a arbitragem. O Estado alega que, por se tratar de ente público, não se submete à arbitragem por força da indisponibilidade do interesse público. À luz do Art. 1º da Lei 9.307/96, assinale a opção correta:",
+                hint: "Foque no Art. 1º, § 1º da Lei de Arbitragem. A lei permite que a Administração Pública (direta e indireta) utilize a arbitragem, desde que envolva um tipo específico de direito.",
+                options: [
+                    "A Administração Pública não pode utilizar a arbitragem por força da supremacia e indisponibilidade do interesse público.",
+                    "A Administração Pública direta e indireta poderá utilizar-se da arbitragem para dirimir conflitos relativos a direitos patrimoniais disponíveis, respeitado o princípio da publicidade.",
+                    "A arbitragem envolvendo entes públicos só é admitida se autorizada previamente por lei específica editada após o surgimento do conflito.",
+                    "Apenas as empresas estatais (sociedades de economia mista e empresas públicas) podem se submeter à arbitragem, sendo vedado à administração direta."
+                ],
+                correct: 1,
+                explanation: "Gabarito: B. Conforme o Art. 1º, §1º da Lei 9.307/96, a Administração Pública direta e indireta pode utilizar a arbitragem para conflitos sobre direitos patrimoniais disponíveis. Além disso, as regras de publicidade devem ser obrigatoriamente respeitadas (§2º)."
+            },
+            {
+                topicId: 1,
+                text: "Durante processo de divórcio, Carlos e Mariana decidem consensualmente submeter a partilha de seus bens móveis e imóveis adquiridos na constância do matrimônio ao juízo arbitral. Paralelamente, buscam decidir a guarda e o regime de alimentos de seus filhos menores também no âmbito da arbitragem. Analisando as restrições da matéria passível de arbitragem:",
+                hint: "Veja o Art. 1º, caput. Lembre-se: direitos de família como guarda e alimentos envolvem interesses de menores e não são passíveis de livre disposição.",
+                options: [
+                    "Carlos e Mariana podem submeter todas as matérias discutidas à arbitragem, pois são consensuais.",
+                    "Tanto a partilha de bens quanto a guarda e alimentos podem ser arbitrados por envolverem relações puramente privadas.",
+                    "Apenas a partilha de bens pode ser objeto de arbitragem por se tratar de direito patrimonial disponível. A guarda e os alimentos envolvem direitos indisponíveis (estado da pessoa e interesse de menor) e são vedados.",
+                    "A partilha de bens imóveis é de direito indisponível por depender de registro público, sendo nula a cláusula arbitral nesse ponto."
+                ],
+                correct: 2,
+                explanation: "Gabarito: C. A arbitragem restringe-se a direitos patrimoniais disponíveis (Art. 1º). Custódia de menores e alimentos são direitos indisponíveis indiscutíveis por meio de arbitragem."
+            },
+            {
+                topicId: 1,
+                text: "Uma grande companhia aérea introduz cláusula de arbitragem compulsória em seu contrato de transporte de passageiros (contrato de adesão eletrônico). Diante de um severo atraso de voo internacional que gerou danos morais e materiais, o consumidor questiona a validade da referida cláusula. De acordo com a sistemática legal:",
+                hint: "Confira o Art. 4º, § 2º da Lei 9.307/96. Contratos de adesão possuem uma trava de segurança e a arbitragem não se impõe automaticamente sem um aceite claro.",
+                options: [
+                    "A cláusula é plenamente válida, pois o consumidor assinou digitalmente o contrato eletrônico.",
+                    "A convenção arbitral em relações de consumo envolvendo contratos de adesão só terá eficácia se o aderente (consumidor) tomar a iniciativa de instituir a arbitragem ou concordar, expressamente, com a sua instituição de forma específica.",
+                    "Toda relação consumerista impede terminantemente o uso da arbitragem, mesmo que o consumidor tenha interesse na celeridade.",
+                    "A arbitragem só é viável em relações de consumo se o valor da causa ultrapassar 40 salários-mínimos."
+                ],
+                correct: 1,
+                explanation: "Gabarito: B. Aplicando o raciocínio estendido do Art. 4º, §2º (contratos de adesão) e jurisprudência consolidada sobre o Código de Defesa do Consumidor, a arbitragem compulsória em contratos de adesão de consumo não se impõe unilateralmente. O consumidor deve anuir especificamente de forma destacada ou tomar a iniciativa."
+            },
+            {
+                topicId: 1,
+                text: "Uma importante empresa pública federal assina contrato administrativo com empresa privada. No corpo do contrato, há previsão de submissão de litígios à arbitragem de equidade. De acordo com os limites legais impostos à Administração Pública no Art. 2º e Art. 1º da Lei de Arbitragem:",
+                hint: "Dica: Art. 2º, § 3º. A Administração Pública possui certas amarras ao utilizar a arbitragem. Ela não pode abrir mão da aplicação estrita da lei (não julga pelo 'sentimento do que é justo').",
+                options: [
+                    "A cláusula é perfeitamente válida em sua totalidade.",
+                    "A Administração Pública não pode recorrer à arbitragem, restando nula a cláusula.",
+                    "A arbitragem envolvendo a Administração Pública deve ser necessariamente de direito, vedada a arbitragem por equidade.",
+                    "É livre a pactuação de equidade por entes públicos, desde que os árbitros sejam servidores públicos de carreira."
+                ],
+                correct: 2,
+                explanation: "Gabarito: C. Conforme o Art. 2º, §3º da Lei 9.307/96, a arbitragem que envolva a Administração Pública será sempre de direito e respeitará o princípio da publicidade. A equidade é vedada aos entes públicos."
+            },
+            {
+                topicId: 1,
+                text: "Dois irmãos decidem solucionar a partilha da herança legítima de seu pai, falecido há pouco tempo, por meio de arbitragem de comum acordo. No entanto, o inventário ainda não foi formalizado e existem credores do espólio batendo à porta. No tocante aos direitos patrimoniais disponíveis sobre herança:",
+                hint: "Art. 1º: A lei fala sobre pessoas capazes resolverem sobre 'direitos patrimoniais disponíveis'. A partilha de quinhão líquido entre maiores é direito deles, mas não podem afetar credores (terceiros).",
+                options: [
+                    "Direito de herança legítima, antes de partilhado e liquidadas as dívidas do espólio, é considerado de natureza indivisível e de disposição condicionada, impedindo a arbitragem sobre o acervo geral sem a concordância de todos os potenciais credores.",
+                    "Por ser matéria sucessória, é vedada a arbitragem em qualquer hipótese, sendo de competência exclusiva e inderrogável do juiz de órfãos e sucessões.",
+                    "Os herdeiros capazes podem pactuar a arbitragem para realizar a partilha puramente interna dos quinhões líquidos disponíveis, sem prejuízo aos direitos indisponíveis de terceiros (credores), que não são afetados.",
+                    "A arbitragem sucessória só é válida se houver testamento do falecido impondo-a de maneira irrevogável."
+                ],
+                correct: 2,
+                explanation: "Gabarito: C. Herdeiros maiores e capazes podem resolver a partilha (direitos patrimoniais disponíveis) por arbitragem. Obviamente, a decisão arbitral não pode prejudicar direitos de terceiros alheios à arbitragem (credores)."
+            },
+
+            // T2: Convenção de Arbitragem (Arts. 3º ao 8º)
+            {
+                topicId: 2,
+                text: "João assinou contrato de prestação de serviços com uma construtora que continha cláusula compromissória cheia. Ocorrendo inadimplemento, João notificou a construtora para instituir a arbitragem, mas ela quedou-se inerte, recusando-se a assinar o compromisso arbitral. Diante da resistência, João deve recorrer ao:",
+                hint: "Foque no Art. 7º, caput da Lei 9.307/96. Se há resistência à cláusula, a parte deve requerer judicialmente para forçar a lavratura do compromisso.",
+                options: [
+                    "Juízo arbitral de forma unilateral, indicando um árbitro que proferirá decisão à revelia imediata.",
+                    "Poder Judiciário, requerendo a execução específica da cláusula nos termos do Art. 7º da Lei de Arbitragem, para que o juiz estatal supra a vontade da parte recalcitrante.",
+                    "Órgão de Proteção ao Consumidor para anular o contrato.",
+                    "Ministério Público para forçar a mediação compulsória."
+                ],
+                correct: 1,
+                explanation: "Gabarito: B. O Art. 7º prevê que, havendo cláusula compromissória e resistência na instituição da arbitragem, a parte interessada pode invocar o Judiciário para suprir a declaração de vontade do recalcitrante e lavrar o compromisso arbitral."
+            },
+            {
+                topicId: 2,
+                text: "Determinado contrato de franquia contém cláusula compromissória prevendo arbitragem. O franqueado, alegando vício de consentimento no contrato principal (dolo), ajuíza ação de anulação do contrato perante a Justiça Comum. O franqueador contesta alegando a existência da convenção de arbitragem. Qual princípio fundamenta a prioridade do árbitro para decidir sobre a validade do contrato e da própria cláusula?",
+                hint: "Art. 8º, parágrafo único. Este artigo consagra a primazia da jurisdição arbitral para analisar a sua própria competência. Qual é o nome técnico em alemão para isso?",
+                options: [
+                    "Princípio da Supremacia do Judiciário.",
+                    "Princípio da Kompetenz-Kompetenz (Competência-Competência), expresso no Art. 8º da Lei.",
+                    "Princípio da Boa-fé Objetiva.",
+                    "Princípio da Celeridade Processual."
+                ],
+                correct: 1,
+                explanation: "Gabarito: B. O Art. 8º consagra o princípio da autonomia da cláusula compromissória e da competência-competência: cabe ao árbitro decidir, de ofício ou por provocação, sobre sua própria competência e a validade da convenção arbitral."
+            },
+            {
+                topicId: 2,
+                text: "Qual a diferença conceitual e prática precisa entre Cláusula Compromissória e Compromisso Arbitral segundo a Lei 9.307/96?",
+                hint: "Arts. 4º e 9º da Lei. Lembre-se do momento de sua formação: um é preventivo (antes do problema) e o outro é curativo (quando o problema já existe).",
+                options: [
+                    "A cláusula é o pacto para litígios futuros e eventuais; o compromisso é para litígios já existentes e concretos.",
+                    "A cláusula é celebrada em cartório; o compromisso é firmado exclusivamente perante o Judiciário.",
+                    "A cláusula obriga as partes ao pagamento imediato; o compromisso é mera formalidade facultativa.",
+                    "Não há diferença prática, sendo termos sinônimos usados indistintamente pela lei."
+                ],
+                correct: 0,
+                explanation: "Gabarito: A. Conforme os Arts. 3º, 4º e 9º, a cláusula compromissória é a promessa de submeter litígios futuros à arbitragem (geralmente inserida no contrato). O compromisso arbitral é a submissão de um litígio já instalado à jurisdição arbitral."
+            },
+            {
+                topicId: 2,
+                text: "No que se refere aos requisitos formais de validade do compromisso arbitral extrajudicial estabelecidos no Art. 10 da Lei de Arbitragem, assinale o elemento obrigatório:",
+                hint: "Dê uma lida no Art. 10, incisos I e II. Todo compromisso deve qualificar minuciosamente os atores envolvidos para ser válido.",
+                options: [
+                    "A assinatura de no mínimo três testemunhas com firma reconhecida em cartório.",
+                    "O nome, profissão, estado civil e domicílio das partes e dos árbitros, ou a indicação da entidade à qual as partes delegaram a indicação.",
+                    "A fixação prévia e indiscutível de multa diária mínima de 10% do valor do contrato para descumprimento.",
+                    "A declaração de renúncia expressa a qualquer direito constitucional de ampla defesa."
+                ],
+                correct: 1,
+                explanation: "Gabarito: B. O Art. 10, inciso I, estatui que são requisitos obrigatórios do compromisso a qualificação completa das partes e dos árbitros (ou indicação da câmara encarregada)."
+            },
+            {
+                topicId: 2,
+                text: "Empresa de Transportes adquiriu insumos de grande fornecedor assinando contrato padrão que continha cláusula de arbitragem em letras miúdas na última folha, sem assinatura específica desse item. Diante de desacordo comercial, o fornecedor inicia arbitragem. A empresa de transportes recusa-se a participar alegando invalidez formal da cláusula compromissória em contrato de adesão. Decida:",
+                hint: "Examine o Art. 4º, § 2º. Esse dispositivo protege o aderente em contratos de massa, exigindo concordância ativa para que a arbitragem tenha eficácia.",
+                options: [
+                    "A cláusula é válida porque a empresa assinou o contrato como um todo, assumindo os riscos de todas as cláusulas inseridas.",
+                    "A cláusula só terá eficácia se o aderente tomar a iniciativa de instituir a arbitragem ou concordar, expressamente, com a sua instituição, desde que por escrito em documento anexo ou em negrito, com assinatura ou visto especialmente para essa cláusula.",
+                    "A cláusula é sempre nula em qualquer contrato, por ferir o direito constitucional de acesso à Justiça.",
+                    "O contrato não pode ser caracterizado como de adesão, pois envolve duas pessoas jurídicas comerciais."
+                ],
+                correct: 1,
+                explanation: "Gabarito: B. O Art. 4º, § 2º impõe que nos contratos de adesão a cláusula compromissória só terá eficácia se o aderente tomar a iniciativa de instituir a arbitragem ou anuir de forma expressa, por escrito, em documento anexo ou em negrito com assinatura/visto específico."
+            },
+
+            // T3: Árbitro (Art. 13)
+            {
+                topicId: 3,
+                text: "Sobre as qualificações necessárias para atuar como árbitro no Brasil, de acordo com o Art. 13 da Lei 9.307/96, assinale a afirmativa correta:",
+                hint: "Dica: Art. 13, caput. Não há obrigatoriedade de filiação a conselhos de classe. A lei pede apenas dois requisitos muito básicos relacionados à capacidade civil.",
+                options: [
+                    "É obrigatório possuir bacharelado em Direito e inscrição ativa na Ordem dos Advogados do Brasil (OAB).",
+                    "Pode ser árbitro qualquer pessoa física capaz que tenha a confiança das partes.",
+                    "Apenas juízes aposentados e professores universitários de direito podem atuar como árbitros.",
+                    "Exige-se idade mínima de 35 anos e aprovação em exame nacional promovido pela Confederação Brasileira de Arbitragem."
+                ],
+                correct: 1,
+                explanation: "Gabarito: B. Nos termos do Art. 13 da Lei, 'pode ser árbitro qualquer pessoa física capaz que tenha a confiança das partes'. Não há exigência de formação jurídica."
+            },
+            {
+                topicId: 3,
+                text: "Suponha que um árbitro indicado para atuar em litígio imobiliário descubra ser primo de segundo grau do Diretor Jurídico de uma das empresas envolvidas. À luz do dever de revelação constante no Art. 14 da Lei:",
+                hint: "Art. 14, § 1º: A lei exige total transparência. O árbitro deve, antes da aceitação, revelar qualquer fato que coloque em xeque sua neutralidade.",
+                options: [
+                    "O árbitro não precisa informar nada, pois o parentesco colateral de segundo grau não afeta sua convicção jurídica.",
+                    "O árbitro está impedido de julgar e deve renunciar silenciosamente, sem dar explicações para preservar a privacidade familiar.",
+                    "O árbitro deve, antes de aceitar a função, revelar qualquer circunstância que possa suscitar dúvida justificada quanto à sua imparcialidade ou independência, permitindo que as partes se manifestem.",
+                    "Apenas se questionado formalmente, deve revelar o fato sob pena de simples multa pecuniária administrativa."
+                ],
+                correct: 2,
+                explanation: "Gabarito: C. O Art. 14, § 1º determina o rigoroso dever de revelação. O árbitro deve, sob pena de nulidade do processo, expor previamente qualquer fato capaz de gerar dúvidas sobre sua imparcialidade."
+            },
+            {
+                topicId: 3,
+                text: "As hipóteses de impedimento e suspeição aplicadas aos árbitros são:",
+                hint: "Art. 14, caput. A lei equipara a figura do árbitro ao magistrado no que tange aos conflitos de interesse estabelecidos pelo CPC.",
+                options: [
+                    "Exclusivamente as previstas nos estatutos da OAB.",
+                    "As mesmas aplicadas aos juízes do Poder Judiciário, previstas no Código de Processo Civil.",
+                    "Critérios subjetivos fixados unilateralmente pela câmara arbitral responsável.",
+                    "Inexistentes, pois a arbitragem é baseada na estrita autonomia de escolha das partes."
+                ],
+                correct: 1,
+                explanation: "Gabarito: B. De acordo com o Art. 14, caput, os árbitros estão submetidos aos mesmos impedimentos e suspeições aplicáveis aos juízes de direito."
+            },
+            {
+                topicId: 3,
+                text: "As partes decidem pactuar uma arbitragem ad hoc e elegem dois árbitros especialistas. Estes dois árbitros divergem profundamente e o tribunal arbitral se vê diante de um impasse (empate). Como deve ser resolvida a situação?",
+                hint: "Art. 13, § 1º e § 2º. O número de árbitros deve ser ímpar. Havendo número par de indicados pelas partes, os árbitros nomearão o desempate.",
+                options: [
+                    "A arbitragem é extinta imediatamente e o litígio deve ser enviado ao Poder Judiciário comum.",
+                    "Os dois árbitros estão autorizados por lei a nomear um terceiro árbitro de desempate. Caso não cheguem a acordo sobre essa nomeação, as partes requererão ao órgão do Poder Judiciário competente para fazer a indicação.",
+                    "O árbitro mais idoso tem voto de qualidade qualificado para impor sua decisão ao outro.",
+                    "A parte autora perde o direito de ação arbitral por ausência de maioria de convencimento."
+                ],
+                correct: 1,
+                explanation: "Gabarito: B. O Art. 13, § 1º dispõe que se as partes nomearem árbitros em número par, estes estão autorizados a nomear mais um. Em caso de impasse, o Judiciário pode ser acionado para definir (§ 2º)."
+            },
+            {
+                topicId: 3,
+                text: "O árbitro, no desempenho de suas atribuições constitucionais e legais na arbitragem brasileira:",
+                hint: "Dica de Mestre: Art. 13, § 6º elenca exatamente 5 pilares do comportamento ético e profissional do árbitro. Memorize-os.",
+                options: [
+                    "Não responde civilmente por negligência, agindo de forma absolutamente imune a perdas e danos.",
+                    "Deve proceder com imparcialidade, independência, competência, diligência e discrição.",
+                    "Está dispensado do dever de sigilo profissional por se tratar de justiça de natureza pública e de livre acesso.",
+                    "Submete-se ao controle hierárquico disciplinar direto do Tribunal de Justiça do Estado."
+                ],
+                correct: 1,
+                explanation: "Gabarito: B. O Art. 13, § 6º elenca expressamente os deveres fundamentais do árbitro: atuar com imparcialidade, independência, competência, diligência e discrição."
+            },
+
+            // T4: Juiz de Fato e de Direito (Art. 18)
+            {
+                topicId: 4,
+                text: "O Art. 18 da Lei de Arbitragem prevê que 'O árbitro é juiz de fato e de direito'. Qual a principal consequência jurídica dessa qualificação em relação à homologação da sentença arbitral pelo Poder Judiciário?",
+                hint: "Art. 18 c/c Art. 31. Como juiz de direito, a canetada do árbitro cria um título executivo pronto, sem precisar do 'carimbo' ou aprovação de um juiz de toga.",
+                options: [
+                    "A sentença arbitral depende obrigatoriamente de homologação pelo Tribunal de Justiça correspondente para produzir efeitos executivos.",
+                    "A decisão arbitral não está sujeita a recurso ou a homologação judicial para ter eficácia de título executivo e coisa julgada entre as partes.",
+                    "Somente as sentenças condenatórias precisam de chancela do juiz estatal para penhorar bens.",
+                    "O juiz estatal deve obrigatoriamente revisar o mérito da decisão arbitral para verificar sua justiça."
+                ],
+                correct: 1,
+                explanation: "Gabarito: B. A sentença arbitral produz, entre as partes e seus sucessores, os mesmos efeitos da sentença proferida pelo Poder Judiciário, dispensando homologação judicial (Arts. 18 e 31)."
+            },
+            {
+                topicId: 4,
+                text: "No exercício de suas funções, no que tange a crimes praticados por ou contra árbitro no transcurso de procedimento arbitral, o árbitro é considerado:",
+                hint: "Veja o Art. 17. O Estado confere um 'escudo' penal à atuação do árbitro, igualando-o a membros do estado para questões criminais.",
+                options: [
+                    "Cidadão comum em gozo de liberdade civil, não se tipificando crimes próprios de funcionários públicos.",
+                    "Funcionário público para os efeitos da legislação penal.",
+                    "Magistrado de carreira com prerrogativas de foro especial por prerrogativa de função.",
+                    "Diplomata imune à jurisdição penal nacional."
+                ],
+                correct: 1,
+                explanation: "Gabarito: B. O Art. 17 da Lei 9.307/96 equipara expressamente os árbitros a funcionários públicos para efeitos da legislação penal (crimes como corrupção passiva, concussão, etc.)."
+            },
+            {
+                topicId: 4,
+                text: "A sentença arbitral proferida pelo árbitro, como juiz de fato e de direito, admite qual tipo de recurso voltado a reexaminar o mérito da lide perante o Poder Judiciário?",
+                hint: "Lembre-se do Art. 18 c/c Art. 32. O mérito é intocável pelo juiz estatal! O Judiciário só pode analisar eventuais furos procedimentais graves.",
+                options: [
+                    "Recurso de Apelação Cível para o respectivo Tribunal de Justiça regional.",
+                    "Recurso Especial fundado em manifesta contrariedade da lei federal pelo árbitro.",
+                    "Nenhum recurso judicial é cabível para rediscutir o mérito da decisão do árbitro; cabe apenas a ação de nulidade com base em vícios formais taxativos elencados na Lei.",
+                    "Embargos Infringentes ao mérito de equidade."
+                ],
+                correct: 2,
+                explanation: "Gabarito: C. O Judiciário é incompetente para julgar o mérito da controvérsia resolvida por arbitragem. Admite-se apenas a invalidação formal através da Ação Anulatória nos termos estritos do Art. 32."
+            },
+            {
+                topicId: 4,
+                text: "Caso um árbitro constate, durante as oitivas de testemunhas, que uma das partes apresentou um contrato nitidamente falsificado para instruir a petição, pode o próprio árbitro decretar a prisão em flagrante ou a busca e apreensão imediata de documentos?",
+                hint: "Dica: O árbitro tem 'iurisdictio' (poder de julgar), mas não tem 'imperium' (poder de força física/policial). Para isso, usa o Art. 22-C (Carta Arbitral).",
+                options: [
+                    "Sim, por ser juiz de fato e de direito, tem plenos poderes coercitivos e de polícia processual.",
+                    "Não. Falta ao árbitro o poder de coerção (imperium) estatal. Ele deve relatar o fato e requerer as medidas coercitivas ou cautelares ao Poder Judiciário competente através de Carta Arbitral, ou oficiar ao Ministério Público.",
+                    "O árbitro deve suspender o processo de forma irrevogável e remeter os autos para a delegacia de polícia mais próxima.",
+                    "Ele pode impor pena restritiva de direitos se as partes concordarem no compromisso."
+                ],
+                correct: 1,
+                explanation: "Gabarito: B. O árbitro possui jurisdição, mas carece do poder de coerção (imperium). Para medidas de caráter coercitivo, depende do auxílio do juiz de direito (Poder Judiciário) via Carta Arbitral."
+            },
+            {
+                topicId: 4,
+                text: "Uma decisão arbitral parcial determina a exibição sob pena de busca e apreensão de equipamentos industriais de grande porte. A parte requerida descumpre a ordem do árbitro. Diante disso, como proceder?",
+                hint: "Veja o Art. 22-C da L. 9.307/96. Existe uma ponte de cooperação entre o tribunal privado e o juiz estatal.",
+                options: [
+                    "O árbitro de per si expedirá mandado de busca e apreensão a ser cumprido por oficiais de justiça estatais de forma direta.",
+                    "O árbitro aplicará a medida cautelar e solicitará sua execução coercitiva ao juízo estatal competente, que dará cumprimento à ordem.",
+                    "A decisão perde sua validade por ausência de cumprimento voluntário.",
+                    "Exige-se a conversão da arbitragem em processo judicial ordinário comum."
+                ],
+                correct: 1,
+                explanation: "Gabarito: B. Através da cooperação judicial, o árbitro emite uma Carta Arbitral para o Judiciário a fim de operacionalizar as medidas restritivas e coercitivas necessárias."
+            },
+
+            // T5: Princípios do Procedimento Arbitral (Art. 21)
+            {
+                topicId: 5,
+                text: "O Art. 21 estabelece que o procedimento arbitral obedecerá à disciplina que as partes acordarem. Contudo, impõe limites fundamentais intransponíveis. De acordo com o §2º do referido artigo, quais princípios devem ser obrigatoriamente observados sob pena de nulidade absoluta da sentença?",
+                hint: "Art. 21, § 2º. São 4 os pilares pétreos inegociáveis: Contraditório, Igualdade, Imparcialidade e Livre Convencimento.",
+                options: [
+                    "Celeridade, oralidade e gratuidade de custas.",
+                    "Contraditório, igualdade das partes, imparcialidade do árbitro e seu livre convencimento.",
+                    "Duplo grau de jurisdição, publicidade absoluta e tipicidade estrita.",
+                    "Soberania nacional, supremacia do interesse público e verdade real."
+                ],
+                correct: 1,
+                explanation: "Gabarito: B. O Art. 21, § 2º determina: 'Serão sempre respeitados no procedimento arbitral os princípios do contraditório, da igualdade das partes, da imparcialidade do árbitro e de seu livre convencimento'."
+            },
+            {
+                topicId: 5,
+                text: "Durante o procedimento de arbitragem, o árbitro nega a produção de prova pericial contábil complexa requerida pela ré, alegando que seu livre convencimento já está maduro após analisar as planilhas unilaterais trazidas pelo autor. Esta conduta pode gerar:",
+                hint: "Conjugue o Art. 21, § 2º com o Art. 32, VIII. Se o árbitro cercear defesa, desrespeita um dos limites constitucionais, abrindo margem a anulação.",
+                options: [
+                    "Nulidade da futura sentença por cerceamento de defesa e violação dos princípios do contraditório e igualdade das partes.",
+                    "Absoluta legalidade, pois o livre convencimento do árbitro é soberano e imune a críticas processuais.",
+                    "Apenas aplicação de multa pecuniária regulamentar contra o árbitro.",
+                    "A prorrogação compulsória da produção de provas por mais 6 meses."
+                ],
+                correct: 0,
+                explanation: "Gabarito: A. Embora vigore o livre convencimento, o cerceamento de prova essencial fere de morte o contraditório e a ampla defesa, consistindo em causa clássica de anulação da sentença com esteio no Art. 32, VIII c/c Art. 21, §2º."
+            },
+            {
+                topicId: 5,
+                text: "As partes podem estipular livremente as regras do procedimento arbitral, inclusive reportando-se às regras de um órgão arbitral institucional ou entidade especializada. Essa liberdade decorre do princípio da:",
+                hint: "Art. 21, caput. Na arbitragem, quem manda na 'regra do jogo' são os próprios participantes (o contrato faz lei entre as partes).",
+                options: [
+                    "Autonomia da vontade das partes.",
+                    "Hierarquia das leis federais sobre contratos.",
+                    "Indelegabilidade da função pública.",
+                    "Verdade formal mitigada."
+                ],
+                correct: 0,
+                explanation: "Gabarito: A. A arbitragem apoia-se fortemente no princípio da autonomia da vontade das partes (Art. 21, caput), que lhes confere a faculdade de ditar as regras procedimentais que regerão a disputa."
+            },
+            {
+                topicId: 5,
+                text: "No que se refere à obrigatoriedade de representação por advogado no procedimento arbitral de acordo com a Lei 9.307/96:",
+                hint: "Art. 21, § 3º: 'As partes *poderão* postular por intermédio de advogado...'. Qual é o peso da palavra *poderão*?",
+                options: [
+                    "A presença de advogado constituído pelas partes é nula e incompatível com o espírito informal da arbitragem.",
+                    "As partes podem postular em causa própria ou fazer-se representar por procurador capaz, sendo a assistência por advogado facultativa (jus postulandi das partes), a menos que as regras da instituição arbitral escolhida exijam.",
+                    "O processo arbitral impõe a presença de advogado sob pena de extinção imediata sem julgamento do mérito.",
+                    "Exige-se unicamente a nomeação de defensor público custeado pelo Estado."
+                ],
+                correct: 1,
+                explanation: "Gabarito: B. O Art. 21, § 3º estabelece que as partes podem fazer-se representar por advogado, mas a representação técnica não é imposta por lei como obrigatória para a validade do ato arbitral (autonomia)."
+            },
+            {
+                topicId: 5,
+                text: "Se uma das partes, devidamente convocada por correspondência registrada para prestar depoimento pessoal perante o tribunal arbitral, decidir simplesmente não comparecer sem justificativa legítima:",
+                hint: "Art. 22, § 2º: A revelia ou ausência intencional da parte não trava o procedimento e será contabilizada pelo árbitro.",
+                options: [
+                    "A arbitragem deve ser imediatamente extinta devido à ausência de manifestação consensual presencial.",
+                    "O árbitro poderá aplicar a revelia e julgar com base nas provas existentes, devendo a ausência injustificada ser considerada pelo árbitro ao proferir a sentença.",
+                    "O árbitro requererá condução coercitiva imediata da parte por meio da polícia civil.",
+                    "A lide é considerada tacitamente vencida pela parte que compareceu."
+                ],
+                correct: 1,
+                explanation: "Gabarito: B. Conforme o Art. 22, § 2º da Lei, a ausência de uma das partes devidamente intimada não obsta o julgamento, devendo o árbitro levar em conta o comportamento para a formação do seu convencimento."
+            },
+
+            // T6: Tutelas Provisórias e Carta Arbitral (Arts. 22-A, 22-B e 22-C)
+            {
+                topicId: 6,
+                text: "Antes de instituída a arbitragem, surge uma situação de extrema urgência em que mercadorias perecíveis correm risco de perda total em porto aduaneiro. Como as partes devem proceder para obter tutela provisória de urgência?",
+                hint: "Verifique o Art. 22-A: se não existe árbitro nomeado ainda, a quem a parte vai chorar uma cautelar antecedente? Só sobra o Estado.",
+                options: [
+                    "Devem requerer a medida diretamente ao árbitro, mesmo que ele ainda não tenha sido escolhido ou aceitado o encargo.",
+                    "Devem requerer a medida cautelar ou de urgência ao Poder Judiciário comum. Uma vez instituída a arbitragem, caberá aos árbitros manter, modificar ou revogar a medida concedida pelo juiz.",
+                    "O pedido deve ser enviado ao Ministério da Indústria e Comércio.",
+                    "A urgência prévia é ineficaz; as partes devem aguardar a constituição do tribunal arbitral independentemente dos prejuízos."
+                ],
+                correct: 1,
+                explanation: "Gabarito: B. De acordo com o Art. 22-A, antes de instituída a arbitragem, as partes podem recorrer ao Judiciário para tutelas de urgência. Instituída a arbitragem, cessa a competência do juiz e os árbitros assumem o controle, podendo manter ou revogar a ordem concedida (§ único)."
+            },
+            {
+                topicId: 6,
+                text: "Qual o prazo legal decadencial improrrogável estabelecido no Art. 22-A, parágrafo único, para que a parte requeira a instituição da arbitragem após a efetivação de tutela cautelar concedida em caráter antecedente pelo juiz estatal comum?",
+                hint: "Art. 22-A, parágrafo único. É um prazo idêntico ao clássico de ações cautelares antecedentes no processo civil.",
+                options: [
+                    "15 (quinze) dias.",
+                    "30 (trinta) dias.",
+                    "60 (sessenta) dias.",
+                    "90 (noventa) dias."
+                ],
+                correct: 1,
+                explanation: "Gabarito: B. Cessa a eficácia da tutela cautelar concedida em caráter antecedente se a parte não requerer a instituição da arbitragem no prazo de 30 dias contados da efetivação da medida (Art. 22-A, parágrafo único)."
+            },
+            {
+                topicId: 6,
+                text: "Como se conceitua e para que serve o instrumento processual denominado 'Carta Arbitral' inserido na reforma da Lei de Arbitragem (Art. 22-C)?",
+                hint: "A Carta Arbitral (Art. 22-C) é a 'prima' da Carta Precatória, mas enviada de uma câmara de arbitragem para a Justiça Comum.",
+                options: [
+                    "É a carta escrita enviada pelo árbitro às partes informando o valor das custas iniciais e honorários sucumbenciais.",
+                    "É um instrumento de cooperação para que o árbitro requeira ao órgão do Poder Judiciário que pratique ou ordene a prática de ato de caráter coercitivo ou executório pendente.",
+                    "É a notificação enviada à OAB denunciando má conduta processual do advogado atuante.",
+                    "É o envelope lacrado que contém o voto secreto dos árbitros minoritários."
+                ],
+                correct: 1,
+                explanation: "Gabarito: B. O Art. 22-C define a Carta Arbitral como canal de comunicação e auxílio mútuco, pela qual o árbitro requer ao Judiciário a realização de atos que exijam coerção estatal (ex: intimação de testemunha sob pena de condução ou arresto)."
+            },
+            {
+                topicId: 6,
+                text: "No cumprimento da Carta Arbitral expedida por tribunal de arbitragem solicitando penhora prévia de ativos de empresa devedora:",
+                hint: "Leia o Art. 22-C, parágrafo único. O juiz faz controle meramente formal e respeita uma característica muito famosa da arbitragem: o sigilo.",
+                options: [
+                    "O juiz de direito pode revisar o mérito da decisão do árbitro antes de cumprir a ordem cautelar solicitada.",
+                    "O juiz estatal apenas controlará a legalidade formal da carta arbitral, sendo-lhe vedado o reexame do mérito do litígio sob arbitragem.",
+                    "O cumprimento é facultativo, cabendo ao juiz analisar a conveniência de auxiliar a câmara privada.",
+                    "O processo deve obrigatoriamente tramitar sem sigilo de justiça, mesmo que a arbitragem seja confidencial."
+                ],
+                correct: 1,
+                explanation: "Gabarito: B. O juiz estatal realiza controle puramente formal. É vedada a revisão do acerto da lide (mérito da ordem arbitral). Adicionalmente, se houver confidencialidade na arbitragem, o segredo deve ser mantido no Judiciário (Art. 22-C, § único)."
+            },
+            {
+                topicId: 6,
+                text: "Havendo deferimento de tutela cautelar urgente pelo tribunal arbitral já plenamente constituído, caso o destinatário da ordem se recuse formalmente a cumpri-la de forma espontânea, os árbitros devem:",
+                hint: "Art. 22-B e 22-C: Quando a parte chuta o balde na arbitragem, o árbitro precisa pedir os 'músculos' do Estado via ofício de cooperação.",
+                options: [
+                    "Fixar multa pessoal criminal de prisão por desobediência e expedir mandado coercitivo direto.",
+                    "Utilizar-se da cooperação jurisdicional e remeter Carta Arbitral ao juízo estatal para que este promova a execução coercitiva da medida protetiva.",
+                    "Declarar a extinção do direito material da parte desobediente.",
+                    "Impor a liquidação forçada das cotas da empresa devedora sem auxílio estatal."
+                ],
+                correct: 1,
+                explanation: "Gabarito: B. Sendo o tribunal arbitral despido de poder coativo direto, recorre ao juiz de direito por meio da Carta Arbitral (Art. 22-B c/c 22-C) para forçar o cumprimento."
+            },
+
+            // T7: Prazo da Sentença (Art. 23)
+            {
+                topicId: 7,
+                text: "As partes celebraram arbitragem institucional de acordo com as regras de prestigiada Câmara, mas omitiram no contrato o prazo limite para o proferimento da sentença final. Conforme o Art. 23 da Lei de Arbitragem, qual o prazo legal supletivo aplicável?",
+                hint: "Seja cirúrgico no Art. 23, caput da Lei 9.307/96. Quando o contrato não diz, existe um prazo em meses muito claro.",
+                options: [
+                    "90 (noventa) dias.",
+                    "180 (cento e oitenta) dias ou 6 (seis) meses.",
+                    "1 (um) ano.",
+                    "Não há prazo legal, permanecendo em aberto indefinidamente até a conclusão natural."
+                ],
+                correct: 1,
+                explanation: "Gabarito: B. O Art. 23 estabelece que a sentença deve ser proferida no prazo estipulado pelas partes. Se não houver estipulação, o prazo será de seis meses contados da instituição da arbitragem ou da substituição do árbitro."
+            },
+            {
+                topicId: 7,
+                text: "No decurso do procedimento arbitral, os árbitros constatam que a perícia técnica de engenharia civil atrasará e necessitará de mais tempo do que o inicialmente previsto. O prazo final para a sentença arbitral se aproxima rapidamente. Como os árbitros podem prorrogar validamente o prazo?",
+                hint: "Atente-se ao Art. 23, § 2º. Ninguém pode forçar mais prazo sozinho. É necessário o aval mútuo das forças atuantes.",
+                options: [
+                    "A prorrogação do prazo da sentença arbitral pode ocorrer mediante prévio acordo escrito entre as partes e os árbitros.",
+                    "Os árbitros podem prorrogar o prazo unilateralmente, por quantas vezes julgarem necessário, notificando posteriormente.",
+                    "Exige-se autorização judicial fundamentada para validar o alongamento do prazo da arbitragem.",
+                    "A lei proíbe qualquer tipo de prorrogação, gerando nulidade insuperável do processo se ultrapassado o prazo original."
+                ],
+                correct: 0,
+                explanation: "Gabarito: A. Conforme o Art. 23, § 2º, a prorrogação do prazo para a prolação da sentença arbitral é cabível se houver comum acordo entre as partes e os árbitros."
+            },
+            {
+                topicId: 7,
+                text: "Suponha que o prazo final ajustado para a prolação da sentença arbitral tenha vencido em 10 de maio. Sem que qualquer sentença tenha sido proferida, as partes permaneceram em silêncio. No dia 12 de maio, o autor da demanda percebe a inércia. Para resguardar o direito de anular uma eventual decisão tardia indesejada, o que deve fazer imediatamente?",
+                hint: "Dica: Art. 12, inciso III da L. 9.307/96. O silêncio da parte é lido como concordância tácita com o atraso se ela não notificar formalmente dentro de um curtíssimo prazo.",
+                options: [
+                    "Aguardar a sentença tardia e, se for desfavorável, ajuizar a ação anulatória direta.",
+                    "Notificar o árbitro ou o presidente do tribunal arbitral, declarando extinto o procedimento pelo decurso do prazo e constituindo-o em mora, no prazo de até 10 dias contados do vencimento.",
+                    "Impetrar Mandado de Segurança repressivo perante o Tribunal de Justiça.",
+                    "Protocolar petição idêntica no Poder Judiciário presumindo a desistência do réu."
+                ],
+                correct: 1,
+                explanation: "Gabarito: B. O Art. 32, VII diz que é nula a sentença proferida fora do prazo. Contudo, o Art. 12, III impõe que a parte interessada deve ter notificado o árbitro manifestando sua oposição no prazo de 10 dias do encerramento do prazo, sob pena de preclusão e convalidação de sentença tardia."
+            },
+            {
+                topicId: 7,
+                text: "A Lei de Arbitragem autoriza a prolação de sentenças parciais no curso do procedimento arbitral?",
+                hint: "Essa novidade foi trazida em 2015. Consulte o Art. 23, § 1º, que possibilita o julgamento fracionado do mérito.",
+                options: [
+                    "Não, vigora o princípio da unicidade da sentença de mérito, admitindo-se apenas decisões saneadoras interlocutórias sem força de coisa julgada.",
+                    "Sim, o árbitro ou o tribunal arbitral poderá proferir sentenças parciais antes da decisão final, decidindo capítulos autônomos da lide.",
+                    "Sim, mas dependem de concordância unânime do judiciário para cada ato parcial.",
+                    "Apenas em arbitragens internacionais que envolvam tratados comerciais bilaterais."
+                ],
+                correct: 1,
+                explanation: "Gabarito: B. A reforma trazida pela Lei 13.129/2015 inseriu o Art. 23, § 1º, que expressamente autoriza a prolação de sentenças arbitrais parciais."
+            },
+            {
+                topicId: 7,
+                text: "Se o prazo da arbitragem expirar sem a emissão da sentença final de mérito e tendo ocorrido a devida notificação de oposição por uma das partes dentro dos 10 dias regulamentares, qual a consequência jurídica?",
+                hint: "Com base no Art. 12, III. Uma vez extinto validamente o compromisso por decurso, as partes desfazem a ligação privada daquela lide específica.",
+                options: [
+                    "O processo arbitral reinicia com novos árbitros sorteados pela OAB.",
+                    "Ocorre a caducidade da convenção de arbitragem apenas para aquele litígio específico, liberando as partes para buscarem o Poder Judiciário diretamente.",
+                    "A dívida em discussão considera-se extinta por prescrição intercorrente forçada.",
+                    "O réu é considerado vencedor por ausência de julgamento tempestivo."
+                ],
+                correct: 1,
+                explanation: "Gabarito: B. Extinta a arbitragem sem julgamento tempestivo e tendo havido a oposição formal correta, desfaz-se o juízo arbitral para aquele litígio, podendo a controvérsia ser submetida ao crivo do Poder Judiciário estatal."
+            },
+
+            // T8: Requisitos da Sentença (Art. 26)
+            {
+                topicId: 8,
+                text: "De acordo com o Art. 26 da Lei 9.307/96, a sentença arbitral deve conter requisitos obrigatórios estritos sob pena de nulidade. Assinale a alternativa que elenca corretamente tais requisitos cumulativos:",
+                hint: "Dê uma passada nos incisos do Art. 26. Os elementos de uma sentença arbitral são quase irmãos gêmeos do art. 489 do CPC (Relatório, Fundamentação, Dispositivo...).",
+                options: [
+                    "Qualificação das testemunhas, assinatura do escrivão judiciário e selo de autenticidade cartorária.",
+                    "Relatório, fundamentos da decisão (fatos e direito), dispositivo (decisão da lide e especificações) e data e local em que foi proferida.",
+                    "Relatório sumário, dispensa total de fundamentação fática e indicação da câmara de recursos recursais.",
+                    "Parecer ministerial favorável, assinatura do árbitro e citação do Código de Defesa do Consumidor."
+                ],
+                correct: 1,
+                explanation: "Gabarito: B. O Art. 26 fixa quatro requisitos essenciais: I - o relatório; II - os fundamentos da decisão, onde serão analisadas as questões de fato e de direito; III - o dispositivo; IV - a data e o lugar em que foi proferida."
+            },
+            {
+                topicId: 8,
+                text: "Um tribunal arbitral composto por três árbitros profere sentença por maioria de votos. O árbitro vencido recusa-se a assinar a sentença arbitral por discordar terminantemente do mérito decidido. Como deve ser tratada essa omissão formal à luz do Art. 26, parágrafo único?",
+                hint: "Art. 26, parágrafo único. A lei pensou exatamente em egos feridos. A abstenção isolada não paralisa a força da sentença.",
+                options: [
+                    "A sentença é considerada inexistente e inválida por falta de assinatura de um dos integrantes do colegiado.",
+                    "A sentença é perfeitamente válida, bastando que o presidente do tribunal arbitral assine por ele, declarando a recusa ou impossibilidade de assinatura do árbitro dissidente.",
+                    "O processo arbitral deve ser integralmente repetido com outro colegiado de árbitros.",
+                    "Exige-se intervenção judicial para intimar o árbitro sob pena de multa pessoal diária."
+                ],
+                correct: 1,
+                explanation: "Gabarito: B. O parágrafo único do Art. 26 estabelece que a sentença será assinada pela maioria dos árbitros, cabendo ao presidente do tribunal certificar a recusa ou impossibilidade do árbitro vencido de assiná-la."
+            },
+            {
+                topicId: 8,
+                text: "Uma sentença arbitral apresenta fundamentação puramente genérica, limitando-se a dizer que o réu violou os deveres gerais da boa-fé, mas sem analisar as provas testemunhais cruciais encartadas e sem especificar os artigos de lei ou regras de equidade aplicáveis. A parte prejudicada pode pleitear a nulidade dessa sentença com base em qual vício?",
+                hint: "Combine o Art. 26, inciso II (requisitos essenciais) com o Art. 32, inciso III (causa de nulidade por falta de requisito).",
+                options: [
+                    "Falta de fundamentação fática e jurídica, violando requisito essencial de validade (Art. 26, II c/c Art. 32, III).",
+                    "Falta de relatório inicial sobre a vida civil dos sócios da autora.",
+                    "Excesso de prazo na fixação do local de julgamento.",
+                    "Incompetência material absoluta do árbitro para julgar boa-fé contratual."
+                ],
+                correct: 0,
+                explanation: "Gabarito: A. A fundamentação fática e jurídica é requisito essencial insuperável (Art. 26, II). Sua ausência ou deficiência crassa gera nulidade absoluta da sentença (Art. 32, III)."
+            },
+            {
+                topicId: 8,
+                text: "O local indicado na sentença arbitral como sendo o de sua prolação determina a nacionalidade da sentença. Se uma sentença arbitral for proferida fora do território nacional, ela será considerada:",
+                hint: "Art. 34, parágrafo único. A regra da nossa lei baseia-se num critério exclusivamente geográfico (local de prolação).",
+                options: [
+                    "Totalmente nula e inválida para o direito pátrio de plano.",
+                    "Sentença estrangeira, submetendo-se obrigatoriamente ao processo de homologação pelo Superior Tribunal de Justiça (STJ).",
+                    "Nacional de forma fictícia se as partes forem de nacionalidade brasileira.",
+                    "Isenta de qualquer controle formal ou material."
+                ],
+                correct: 1,
+                explanation: "Gabarito: B. De acordo com o Art. 34, parágrafo único, considera-se sentença arbitral estrangeira a que for proferida fora do território nacional. Ela exige homologação do STJ (Art. 35)."
+            },
+            {
+                topicId: 8,
+                text: "A respeito do destino final das despesas da arbitragem, inclusive honorários de perito e custas institucionais, como deve dispor a sentença arbitral segundo o Art. 27 da Lei?",
+                hint: "Art. 27. Assim como os juízes dispõem sobre sucumbência e custas processuais ao final do processo, os árbitros também fazem o balanço da conta.",
+                options: [
+                    "A lei veda qualquer tipo de cobrança, devendo cada parte arcar unicamente com seus gastos sem reembolso.",
+                    "A sentença arbitral decidirá sobre o rateio das despesas da arbitragem, bem como sobre verba decorrente de litigância de má-fé, se houver, respeitado o acordado pelas partes na convenção.",
+                    "A parte autora, vencendo ou perdendo, arca com a integralidade das custas por ter provocado o juízo.",
+                    "Todas as custas devem ser divididas em exatos 50% para cada litigante obrigatoriamente."
+                ],
+                correct: 1,
+                explanation: "Gabarito: B. O Art. 27 prevê que a sentença arbitral disporá sobre a responsabilidade das partes acerca das custas e encargos da arbitragem, observando o que houver sido previamente pactuado na convenção."
+            },
+
+            // T9: Efeitos da Sentença Arbitral (Art. 31)
+            {
+                topicId: 9,
+                text: "Qual a natureza executiva da sentença arbitral brasileira de cunho condenatório no âmbito do Código de Processo Civil e Lei de Arbitragem?",
+                hint: "Atenção ao Art. 31 c/c o Art. 515, inciso VII, do CPC. Ela tem o peso e a mesma classificação procedimental da sentença de um juiz estadual/federal.",
+                options: [
+                    "Consiste em título executivo extrajudicial, demandando processo de execução regular com contraditório amplo prévio.",
+                    "Consiste em título executivo judicial, ensejando a instauração direta de Cumprimento de Sentença perante o Poder Judiciário Civil comum.",
+                    "É mera opinião vinculante privada que exige ação de cobrança monitória primária.",
+                    "Depende de ação de homologação prévia no Tribunal de Justiça estadual para se tornar título executivo."
+                ],
+                correct: 1,
+                explanation: "Gabarito: B. Conforme o Art. 31 da Lei 9.307/96 c/c Art. 515, VII do Código de Processo Civil, a sentença arbitral constitui título executivo judicial, dispensando fase de conhecimento no Judiciário."
+            },
+            {
+                topicId: 9,
+                text: "No que concerne ao trânsito em julgado e coisa julgada da decisão proferida pelo árbitro, assinale a opção correta:",
+                hint: "Dica: Art. 31 diz expressamente que ela 'produz... os mesmos efeitos da sentença proferida pelo Poder Judiciário'.",
+                options: [
+                    "A sentença arbitral faz coisa julgada formal, mas não material, permitindo ampla rediscussão do mérito na via judicial a qualquer tempo.",
+                    "A sentença arbitral produz, entre as partes e seus sucessores, os mesmos efeitos da sentença proferida pelo Poder Judiciário (coisa julgada material definitiva).",
+                    "O efeito de coisa julgada só se opera se houver registro da decisão no Cartório de Títulos e Documentos.",
+                    "A lide pode ser reaberta por simples petição de insatisfação da parte perante o juiz estatal."
+                ],
+                correct: 1,
+                explanation: "Gabarito: B. O Art. 31 assevera os mesmos efeitos da sentença estatal, possuindo eficácia de coisa julgada material entre os litigantes e seus sucessores legais."
+            },
+            {
+                topicId: 9,
+                text: "Após ser notificado da sentença arbitral favorável, o credor decide executar o crédito líquido reconhecido pelo árbitro. Perante qual juízo deve ser proposta a execução judicial de sentença arbitral nacional?",
+                hint: "Segundo a doutrina e as regras de competência do CPC, busca-se o juiz estadual comum que teria originariamente julgado a ação se não houvesse o pacto arbitral.",
+                options: [
+                    "Perante o próprio Tribunal Arbitral que proferiu a sentença.",
+                    "Perante o juízo cível estadual ou federal que seria competente para julgar a causa originariamente, caso não houvesse convenção de arbitragem.",
+                    "Exclusivamente perante o Superior Tribunal de Justiça (STJ).",
+                    "Em qualquer juizado especial cível de trânsito."
+                ],
+                correct: 1,
+                explanation: "Gabarito: B. A execução (cumprimento de sentença) deve ser proposta perante o juízo estatal cível de primeiro grau que seria originalmente competente para julgar a lide, caso a arbitragem não tivesse sido pactuada."
+            },
+            {
+                topicId: 9,
+                text: "A parte sucumbente na arbitragem constata que o árbitro cometeu erro material evidente de digitação na sentença, acrescentando um zero a mais ao valor da condenação (de R$ 10.000,00 para R$ 100.000,00). Conforme o Art. 30, o que pode fazer?",
+                hint: "Veja o Art. 30 da L. 9.307/96. Na arbitragem, também existe uma espécie de 'embargos de declaração', com um prazo estipulado de dias bem curto.",
+                options: [
+                    "Ajuizar Ação de Embargos à Execução de plano no Judiciário.",
+                    "Solicitar ao árbitro ou tribunal arbitral, no prazo de 5 (cinco) dias da notificação, que corrija o erro material ou esclareça obscuridade/omissão.",
+                    "Requerer a anulação integral do procedimento por parcialidade.",
+                    "Fazer representação administrativa por improbidade arbitral."
+                ],
+                correct: 1,
+                explanation: "Gabarito: B. O Art. 30 garante o direito de pedir esclarecimentos ou correção de erros materiais no prazo decadencial de 5 dias contados do recebimento da notificação da sentença."
+            },
+            {
+                topicId: 9,
+                text: "Se o tribunal de arbitragem acolher um pedido de esclarecimentos (embargos arbitrais) formulado por uma das partes, a decisão integrativa proferida pelos árbitros para sanar a omissão:",
+                hint: "O Art. 33, § 1º ensina a partir de quando se conta a contagem do prazo fatal para levar ao judiciário (após o recebimento da decisão final dos pedidos de esclarecimento).",
+                options: [
+                    "Não altera em nada o prazo original da ação anulatória, que conta da primeira decisão.",
+                    "Passa a integrar formalmente a sentença arbitral para todos os fins de direito, contando-se a partir de sua notificação o prazo para eventual ação de nulidade.",
+                    "Depende de registro no tabelionato de notas.",
+                    "Permite recurso extraordinário ao STF por inovação decisória."
+                ],
+                correct: 1,
+                explanation: "Gabarito: B. A decisão integrativa de esclarecimento funde-se à sentença arbitral originária. O prazo de 90 dias para a ação anulatória estatal conta-se apenas da notificação desta última decisão integradora (Art. 33, § 1º)."
+            },
+
+            // T10: Hipóteses de Nulidade (Art. 32)
+            {
+                topicId: 10,
+                text: "O rol de hipóteses de nulidade da sentença arbitral estabelecido no Art. 32 da Lei 9.307/96 é considerado doutrinária e jurisprudencialmente como:",
+                hint: "Art. 32. Lembre-se, o mérito não é rediscutível e não existe 'reserva criativa' para os juízes estatais em anulações. O cardápio é fechado.",
+                options: [
+                    "Meramente exemplificativo (numerus apertus), admitindo anulação por qualquer motivo de injustiça substancial.",
+                    "Taxativo (numerus clausus), restringindo o controle judicial a vícios formais e procedimentais graves expressamente previstos.",
+                    "Inaplicável na prática devido à soberania absoluta e inatacável do árbitro.",
+                    "Dependente de regulamento editado pelo Ministério da Justiça."
+                ],
+                correct: 1,
+                explanation: "Gabarito: B. O controle do Judiciário sobre a sentença arbitral é excepcional e restringe-se estritamente às hipóteses taxativas (numerus clausus) de nulidade do Art. 32."
+            },
+            {
+                topicId: 10,
+                text: "Uma sentença arbitral proferida decide questão completamente alheia ao objeto delimitado pelas partes no compromisso arbitral (decisão extra petita). Qual a consequência jurídica para essa sentença nos termos do Art. 32, IV?",
+                hint: "Pense na regra do corte: se a parte podre da maçã for separável, você não joga toda ela fora. Busque a economia processual c/c Art. 33, § 2º.",
+                options: [
+                    "A sentença é integral e insanavelmente nula em sua totalidade.",
+                    "A sentença será nula apenas na parte em que excedeu os limites da convenção de arbitragem, desde que a parte excedente possa ser separada da decisão principal.",
+                    "A decisão é mantida por economia processual.",
+                    "O árbitro será destituído e obrigado a devolver os honorários."
+                ],
+                correct: 1,
+                explanation: "Gabarito: B. De acordo com o Art. 32, IV c/c Art. 33, § 2º, a nulidade da sentença por julgamento fora dos limites limita-se ao excesso se este for cindível do núcleo principal da decisão arbitral."
+            },
+            {
+                topicId: 10,
+                text: "Assinale qual dos vícios abaixo elencados NÃO constitui causa legal de nulidade da sentença arbitral nos termos expressos do Art. 32 da Lei de Arbitragem:",
+                hint: "Revise os incisos do Art. 32. O que nós não permitimos rediscutir jamais? A justiça do caso e a interpretação do árbitro.",
+                options: [
+                    "Ser nula a convenção de arbitragem.",
+                    "Incorreção na interpretação das provas ou suposto erro de julgamento (injustiça do mérito da decisão).",
+                    "Não conter os requisitos essenciais do Art. 26 (relatório, fundamentação, dispositivo, etc.).",
+                    "Ter sido proferida por quem não podia atuar como árbitro (ex: impedido)."
+                ],
+                correct: 1,
+                explanation: "Gabarito: B. O erro de julgamento (error in iudicando) ou injustiça da decisão de mérito NÃO gera nulidade judicial da sentença. O mérito é de julgamento exclusivo dos árbitros."
+            },
+            {
+                topicId: 10,
+                text: "Fica comprovado de forma cabal, em processo de auditoria interna posterior, que o árbitro único da controvérsia recebeu propina milionária da empresa autora para julgar procedente a cobrança. A conduta amolda-se à causa de nulidade prevista no Art. 32, VI. Qual é esse fundamento legal?",
+                hint: "Dica: Art. 32, inciso VI. Trata-se diretamente dos crimes contra a administração que podem envenenar e anular toda a lide arbitral.",
+                options: [
+                    "Falta de fundamentação.",
+                    "Julgamento fora do prazo.",
+                    "Comprovado que a sentença foi proferida por prevaricação, concussão ou corrupção passiva.",
+                    "Menção a leis estrangeiras não autorizadas."
+                ],
+                correct: 2,
+                explanation: "Gabarito: C. O inciso VI do Art. 32 prevê expressamente a nulidade se houver prova inequívoca de que a sentença foi fruto de corrupção, prevaricação ou concussão do julgador arbitral."
+            },
+            {
+                topicId: 10,
+                text: "Uma sentença arbitral é lavrada sem conter a indicação da data e do local em que foi proferida, inviabilizando aferir sua tempestividade e nacionalidade. Diante deste vício formal:",
+                hint: "Art. 32, inciso III (violação dos requisitos do Art. 26). A ausência do local tem graves impactos até mesmo para definir se a sentença é estrangeira ou pátria.",
+                options: [
+                    "A sentença é considerada inexistente de pleno direito.",
+                    "Trata-se de hipótese de nulidade expressa, por descumprimento dos requisitos essenciais do Art. 26 da Lei (Art. 32, III).",
+                    "A nulidade é sanada automaticamente pelo decurso de 15 dias sem manifestação.",
+                    "A decisão é convertida de pleno direito em minuta de conciliação."
+                ],
+                correct: 1,
+                explanation: "Gabarito: B. A ausência de data e local (requisito essencial do Art. 26, IV) constitui vício formal grave de nulidade com amparo no Art. 32, III."
+            },
+
+            // T11: Ação Anulatória - 90 dias (Art. 33)
+            {
+                topicId: 11,
+                text: "Qual o prazo decadencial estipulado pelo Art. 33, §1º da Lei 9.307/96 para a propositura da Ação de Nulidade da sentença arbitral perante o Poder Judiciário?",
+                hint: "Dica de Mestre: Vá no Art. 33, § 1º. O prazo é contato em meses ou em dias precisos? A lei estipula os famosos \"noventa dias\".",
+                options: [
+                    "15 (quinze) dias.",
+                    "30 (trinta) dias.",
+                    "90 (noventa) dias.",
+                    "120 (cento e vinte) dias."
+                ],
+                correct: 2,
+                explanation: "Gabarito: C. A demanda para decretação de nulidade da sentença arbitral deve ser proposta no prazo de até 90 dias (prazo decadencial)."
+            },
+            {
+                topicId: 11,
+                text: "A partir de qual momento exato inicia-se a contagem do prazo decadencial de 90 dias para ajuizar a ação de nulidade da sentença arbitral?",
+                hint: "Novamente no Art. 33, § 1º. A contagem flui do marco em que a parte é notificada da sua prolação (ou dos esclarecimentos que corrigiram-na).",
+                options: [
+                    "Do dia útil subsequente à data de assinatura da sentença pelo árbitro.",
+                    "Da data do recebimento da notificação da sentença arbitral ou, se houver pedido de esclarecimentos, da notificação da respectiva decisão de integração.",
+                    "Do efetivo registro da sentença na câmara de comércio.",
+                    "Da data em que se iniciou a arbitragem."
+                ],
+                correct: 1,
+                explanation: "Gabarito: B. O prazo flui do recebimento da notificação da sentença final de mérito ou da decisão integrativa que julgou os embargos/pedidos de esclarecimentos (Art. 33, § 1º)."
+            },
+            {
+                topicId: 11,
+                text: "O devedor de uma sentença arbitral condenatória foi réu revel na arbitragem por nunca ter sido notificado validamente para comparecer à instituição da lide. O credor ingressou com Cumprimento de Sentença Judicial no Judiciário após 6 meses da decisão. O devedor perdeu o prazo de 90 dias para a ação de anulação autônoma. Como deve agir o devedor?",
+                hint: "Leia o Art. 33, § 3º. A inércia de 90 dias apaga a chance de agir como 'Ação', mas ele pode se defender (embargos/impugnação) usando os mesmos argumentos nulificantes.",
+                options: [
+                    "Nada pode fazer, pois operou-se a preclusão absoluta pelo decurso do prazo de 90 dias.",
+                    "Poderá arguir a nulidade absoluta da sentença arbitral como matéria de defesa na própria Impugnação ao Cumprimento de Sentença (Art. 33, § 3º).",
+                    "Deve impetrar recurso de apelação extraordinário intempestivo.",
+                    "Deve pagar a dívida e ingressar com ação de repetição de indébito cível."
+                ],
+                correct: 1,
+                explanation: "Gabarito: B. O Art. 33, § 3º estabelece que a decretação de nulidade da sentença arbitral também pode ser arguida em sede de impugnação ao cumprimento de sentença, se houver execução judicial, permitindo a defesa do réu que perdeu o prazo decadencial da ação autônoma (especialmente em casos graves de inexistência de convenção/vício de notificação)."
+            },
+            {
+                topicId: 11,
+                text: "A propositura da Ação Anulatória de sentença arbitral perante a Justiça Estadual Comum gera qual efeito imediato sobre a execução de referida sentença?",
+                hint: "Não há norma dando poder magnético de freio automático. Se você quer paralisar uma execução arbitral c/c Art. 33, tem que convencer o juiz das tutelas de urgência do CPC.",
+                options: [
+                    "Efeito suspensivo automático e obrigatório de todas as medidas de constrição de bens.",
+                    "Não suspende a execução da sentença arbitral, salvo se preenchidos os requisitos legais para concessão de tutela provisória de urgência previstos no CPC (caução, probabilidade do direito e perigo de dano).",
+                    "Extingue imediatamente o processo executivo em andamento.",
+                    "Impõe a obrigação de depósito integral em dinheiro por parte do credor."
+                ],
+                correct: 1,
+                explanation: "Gabarito: B. A ação anulatória não ostenta efeito suspensivo ope legis (automático). Para sustar os efeitos executivos da sentença arbitral, faz-se necessário obter tutela de urgência judicial provando os pressupostos processuais."
+            },
+            {
+                topicId: 11,
+                text: "Julgando procedente a Ação Anulatória fundamentada em vício insanável da Cláusula Compromissória (Art. 32, I), como deve proceder o Juiz de Direito Estatal?",
+                hint: "Veja o Art. 33, § 2º. Se a 'base' (o compromisso) está podre, ninguém vai reescrever a sentença arbitral. Volta-se para o juízo clássico (Estatal).",
+                options: [
+                    "Determinará que os árbitros se reúnam novamente e profiram outra decisão reformada.",
+                    "Declarará a nulidade da sentença arbitral e as partes estarão autorizadas a submeter o litígio diretamente ao Poder Judiciário estatal, posto que a convenção arbitral foi considerada inválida.",
+                    "Julgará ele mesmo o mérito da lide na mesma sentença que anulou o procedimento.",
+                    "Nomeará um novo perito e novos árbitros judiciais oficiais."
+                ],
+                correct: 1,
+                explanation: "Gabarito: B. Se a anulação decorre da inexistência ou nulidade insanável da própria convenção de arbitragem, restabelece-se a jurisdição estatal comum para julgar o conflito diretamente (Art. 33, § 2º, I)."
+            },
+
+            // T12: Homologação de Sentença Estrangeira (Art. 35)
+            {
+                topicId: 12,
+                text: "Uma sentença arbitral resolva disputa comercial bilionária entre empresa brasileira e holding norte-americana, tendo sido integralmente processada e proferida na cidade de Nova York (EUA). Para que esta decisão produza efeitos executivos no Brasil, ela deve ser submetida a:",
+                hint: "Art. 35 da Lei de Arbitragem. Pela alteração constitucional, apenas e tão somente uma única Corte Superior carimba decisões estrangeiras no Brasil.",
+                options: [
+                    "Simples tradução juramentada e registro no cartório de títulos e documentos da capital.",
+                    "Homologação prévia exclusiva pelo Superior Tribunal de Justiça (STJ), nos termos do Art. 35 da Lei e da Constituição Federal.",
+                    "Revisão de mérito por uma das varas cíveis da Justiça Federal.",
+                    "Aprovação do Ministério das Relações Exteriores (Itamaraty)."
+                ],
+                correct: 1,
+                explanation: "Gabarito: B. Conforme o Art. 35 da Lei, para ser reconhecida ou executada no Brasil, a sentença arbitral estrangeira fica sujeita unicamente à homologação do Superior Tribunal de Justiça (STJ)."
+            },
+            {
+                topicId: 12,
+                text: "A homologação de sentença arbitral estrangeira pelo STJ é balizada por quais diplomas normativos de acordo com o Art. 35 da Lei de Arbitragem?",
+                hint: "Foque no Art. 34 c/c Art. 35. Tratados (como Nova York de 1958) têm precedência, usando a legislação interna apenas nas lacunas.",
+                options: [
+                    "Exclusivamente pela lei interna dos Estados Unidos.",
+                    "Pelos tratados internacionais que tenham vigência no Brasil e, na sua ausência, pelas disposições da própria Lei de Arbitragem.",
+                    "Apenas pelo Código de Processo Civil, sem espaço para tratados diplomáticos.",
+                    "Por convenções multilaterais do Mercosul unicamente."
+                ],
+                correct: 1,
+                explanation: "Gabarito: B. O Art. 35 dispõe expressamente que a homologação observará prioritariamente os tratados internacionais vigentes no Brasil (como a Convenção de Nova York de 1958) e, subsidiariamente, as regras internas da Lei."
+            },
+            {
+                topicId: 12,
+                text: "No processo de homologação de sentença arbitral estrangeira perante o STJ, a parte requerida alega que a lide versava sobre validade de patente industrial de segurança nacional, matéria inarbitrável sob a ótica nacional. Conforme o Art. 39, o STJ deve:",
+                hint: "Art. 39, incisos I e II. O STJ age como guardião da Ordem Pública e da competência do Brasil para ditar o que pode ou não ser discutido por árbitros.",
+                options: [
+                    "Homologar a sentença mesmo assim, pois o direito estrangeiro tem primazia sobre a lei brasileira.",
+                    "Recusar a homologação se constatar que, segundo a lei brasileira, o objeto do litígio não é suscetível de resolução por arbitragem (inarbitrabilidade objetiva) ou ofende a ordem pública nacional.",
+                    "Enviar a causa para análise do Supremo Tribunal Federal (STF) para dirimir a controvérsia geopolítica.",
+                    "Converter a arbitragem estrangeira em perícia arbitral nacional obrigatória."
+                ],
+                correct: 1,
+                explanation: "Gabarito: B. O Art. 39 estabelece que o STJ recusará a homologação da sentença arbitral estrangeira se constatar que o objeto não é arbitrável segundo a lei brasileira (inciso I) ou se a decisão violar a ordem pública nacional (inciso II)."
+            },
+            {
+                topicId: 12,
+                text: "Assinale qual dos documentos abaixo NÃO constitui exigência legal obrigatória para instruir a petição inicial de homologação de sentença arbitral estrangeira de acordo com o Art. 37 da Lei:",
+                hint: "Leia o rol simples do Art. 37. Ele pede apenas documentos relativos à essência da prova arbitral e não documentação probatória ou contábil local.",
+                options: [
+                    "O original da sentença arbitral ou cópia devidamente certificada e autenticada pelo consulado brasileiro.",
+                    "O original da convenção de arbitragem ou cópia devidamente certificada.",
+                    "A tradução oficial juramentada de referidos documentos para a língua portuguesa.",
+                    "Laudo pericial financeiro assinado por perito com registro ativo no Conselho Federal de Contabilidade do Brasil."
+                ],
+                correct: 3,
+                explanation: "Gabarito: D. O Art. 37 exige apenas: I - original ou cópia autenticada da sentença estrangeira; II - original ou cópia da convenção; III - tradução juramentada de ambos. Laudo pericial contábil nacional não é requisito de homologação."
+            },
+            {
+                topicId: 12,
+                text: "A holding estrangeira demonstra que o réu brasileiro não foi devidamente notificado da indicação do árbitro nos EUA ou do início do processo arbitral internacional, sendo julgado inteiramente à revelia sem defesa. À luz do Art. 38, II da Lei 9.307/96:",
+                hint: "Art. 38, inciso III (da Lei e seu reflexo no devido processo legal). O STJ corta a homologação pela raiz se ferido o sagrado contraditório e ampla defesa da parte requerida.",
+                options: [
+                    "O STJ homologará a sentença arbitral estrangeira independentemente de defesa, visando a integração comercial internacional.",
+                    "A homologação da sentença arbitral estrangeira será recusada caso a parte requerida prove que não foi devidamente notificada da designação do árbitro ou do procedimento de arbitragem, configurando violação ao devido processo legal internacional.",
+                    "O STJ intimará o árbitro norte-americano para prestar esclarecimentos pessoais em Brasília.",
+                    "A lide deve obrigatoriamente migrar para mediação no consulado brasileiro em Nova York."
+                ],
+                correct: 1,
+                explanation: "Gabarito: B. O Art. 38, II preconiza que se nega a homologação de sentença estrangeira se a parte prejudicada provar que não foi adequadamente notificada da arbitragem ou restou impossibilitada de exercer a ampla defesa."
+            }
+        ];
+
+        // GAMIFICATION STATE VARIABLES
+        let currentXP = 0;
+        let streak = 0;
+        let maxStreak = 0;
+        let userLevel = 1;
+        let totalQuestionsAnswered = 0;
+        let totalCorrectAnswers = 0;
+
+        // SESSION STATE VARIABLES
+        let sessionQuestions = [];
+        let currentIndex = 0;
+        let selectedOption = null;
+        let currentScore = 0;
+        let timerInterval = null;
+        let timeLeft = 30;
+        let hasAnswered = false;
+        let activeQuizMode = 'completo'; // 'completo', 'rapido', 'foco'
+        let selectedTopicIds = [];
+        let mistakesList = []; // Tracks incorrect items for "Review Mistakes"
+        let isReviewMode = false;
+
+        // TOPIC ACCURACY STATS
+        let topicPerformance = {};
+
+        // LEVELS DESCRIPTION
+        const LEVELS = [
+            { minXP: 0, title: "Estagiário de Direito", badge: "🎓" },
+            { minXP: 500, title: "Bacharel em Direito", badge: "📖" },
+            { minXP: 1200, title: "Advogado Generalista", badge: "💼" },
+            { minXP: 2500, title: "Advogado Arbitralista", badge: "⚖️" },
+            { minXP: 4500, title: "Árbitro de Câmara", badge: "👨‍⚖️" },
+            { minXP: 7000, title: "Presidente de Corte Arbitral", badge: "👑" }
+        ];
+
+        // AUDIO CONTEXT MANAGER (Procedural Sound Generator)
+        let soundEnabled = true;
+        let audioCtx = null;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playTone(freq, type, duration) {
+            if (!soundEnabled) return;
+            try {
+                initAudio();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.type = type;
+                osc.frequency.value = freq;
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch (e) {
+                console.log("Audio failed to load", e);
+            }
+        }
+
+        function playCorrectSound() {
+            playTone(523.25, 'triangle', 0.1); // C5
+            setTimeout(() => playTone(659.25, 'triangle', 0.1), 80); // E5
+            setTimeout(() => playTone(783.99, 'triangle', 0.2), 160); // G5
+        }
+
+        function playIncorrectSound() {
+            playTone(220, 'sawtooth', 0.15); // A3
+            setTimeout(() => playTone(147, 'sawtooth', 0.25), 100); // D3
+        }
+
+        function playLevelUpSound() {
+            playTone(261.63, 'square', 0.1); // C4
+            setTimeout(() => playTone(329.63, 'square', 0.1), 100); // E4
+            setTimeout(() => playTone(392.00, 'square', 0.1), 200); // G4
+            setTimeout(() => playTone(523.25, 'square', 0.4), 300); // C5
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            document.getElementById('sound-icon-on').classList.toggle('hidden', !soundEnabled);
+            document.getElementById('sound-icon-off').classList.toggle('hidden', soundEnabled);
+        }
+
+        // LOAD GAME PROGRESS & TOPICS OVERVIEW
+        window.onload = function() {
+            // Load saved stats if any
+            loadStateFromLocalStorage();
+            updateGamificationUI();
+            buildTopicsGrid();
+        };
+
+        function saveStateToLocalStorage() {
+            const data = {
+                currentXP,
+                streak,
+                maxStreak,
+                userLevel,
+                totalQuestionsAnswered,
+                totalCorrectAnswers,
+                topicPerformance
+            };
+            localStorage.setItem('arbitraquest_state_v1', JSON.stringify(data));
+        }
+
+        function loadStateFromLocalStorage() {
+            const saved = localStorage.getItem('arbitraquest_state_v1');
+            if (saved) {
+                try {
+                    const data = JSON.parse(saved);
+                    currentXP = data.currentXP || 0;
+                    streak = data.streak || 0;
+                    maxStreak = data.maxStreak || 0;
+                    userLevel = data.userLevel || 1;
+                    totalQuestionsAnswered = data.totalQuestionsAnswered || 0;
+                    totalCorrectAnswers = data.totalCorrectAnswers || 0;
+                    topicPerformance = data.topicPerformance || {};
+                } catch(e) {
+                    console.error("Failed to parse state", e);
+                }
+            }
+        }
+
+        function resetAllProgress() {
+            if(confirm("Deseja realmente limpar seu histórico de conquistas, XP e progresso?")) {
+                localStorage.removeItem('arbitraquest_state_v1');
+                currentXP = 0;
+                streak = 0;
+                maxStreak = 0;
+                userLevel = 1;
+                totalQuestionsAnswered = 0;
+                totalCorrectAnswers = 0;
+                topicPerformance = {};
+                updateGamificationUI();
+                buildTopicsGrid();
+                backToMainMenu();
+            }
+        }
+
+        function buildTopicsGrid() {
+            const container = document.getElementById('menu-topics-grid');
+            container.innerHTML = '';
+            
+            Object.values(TOPICS).forEach(t => {
+                // Determine performance color
+                let perfStr = 'Não praticado';
+                let perfColor = 'text-slate-400';
+                if (topicPerformance[t.id]) {
+                    const pct = Math.round((topicPerformance[t.id].correct / topicPerformance[t.id].total) * 100);
+                    perfStr = `${pct}% de aproveitamento`;
+                    perfColor = pct >= 70 ? 'text-emerald-400' : pct >= 40 ? 'text-amber-400' : 'text-rose-400';
+                }
+
+                const card = document.createElement('div');
+                card.className = 'bg-juridico-900 border border-juridico-800 rounded-xl p-4 flex flex-col justify-between hover:border-juridico-700 transition cursor-help';
+                card.innerHTML = `
+                    <div>
+                        <div class="flex justify-between items-start">
+                            <span class="text-xl">${t.icon}</span>
+                            <span class="text-[10px] bg-juridico-800 text-dourado-400 px-2 py-0.5 rounded font-bold">${t.ref}</span>
+                        </div>
+                        <h4 class="text-sm font-bold text-white mt-2 leading-snug">${t.name}</h4>
+                    </div>
+                    <div class="mt-3 pt-2 border-t border-juridico-800 flex justify-between items-center text-[10px]">
+                        <span class="${perfColor} font-semibold">${perfStr}</span>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // UPDATE XP, BADGES AND LEVEL CHECKS
+        function addXP(amount) {
+            currentXP += amount;
+            checkLevelUp();
+            updateGamificationUI();
+            saveStateToLocalStorage();
+        }
+
+        function checkLevelUp() {
+            let nextLvl = userLevel;
+            for (let i = LEVELS.length - 1; i >= 0; i--) {
+                if (currentXP >= LEVELS[i].minXP) {
+                    nextLvl = i + 1;
+                    break;
+                }
+            }
+
+            if (nextLvl > userLevel) {
+                userLevel = nextLvl;
+                triggerLevelUpModal();
+            }
+        }
+
+        function triggerLevelUpModal() {
+            const levelInfo = LEVELS[userLevel - 1];
+            document.getElementById('lvl-up-new-title').innerText = `${levelInfo.badge} ${levelInfo.title}`;
+            document.getElementById('modal-level-up').classList.remove('hidden');
+            playLevelUpSound();
+            confetti({
+                particleCount: 150,
+                spread: 80,
+                origin: { y: 0.6 }
+            });
+        }
+
+        function closeLevelUpModal() {
+            document.getElementById('modal-level-up').classList.add('hidden');
+        }
+
+        // DONATION MODAL FUNCTIONS
+        function openDonationModal() {
+            document.getElementById('modal-donation').classList.remove('hidden');
+        }
+
+        function closeDonationModal() {
+            document.getElementById('modal-donation').classList.add('hidden');
+        }
+
+        function copyPix(btnElement) {
+            const pixKey = "financeiro@edupam.com.br";
+            const fallbackCopy = () => {
+                const textArea = document.createElement("textarea");
+                textArea.value = pixKey;
+                document.body.appendChild(textArea);
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    const originalText = btnElement.innerText;
+                    btnElement.innerText = "Copiado! ✓";
+                    btnElement.classList.replace("bg-juridico-700", "bg-emerald-600");
+                    setTimeout(() => {
+                        btnElement.innerText = originalText;
+                        btnElement.classList.replace("bg-emerald-600", "bg-juridico-700");
+                    }, 2000);
+                } catch (err) {
+                    console.error('Falha ao copiar', err);
+                }
+                document.body.removeChild(textArea);
+            };
+
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(pixKey).then(() => {
+                    const originalText = btnElement.innerText;
+                    btnElement.innerText = "Copiado! ✓";
+                    btnElement.classList.replace("bg-juridico-700", "bg-emerald-600");
+                    setTimeout(() => {
+                        btnElement.innerText = originalText;
+                        btnElement.classList.replace("bg-emerald-600", "bg-juridico-700");
+                    }, 2000);
+                }).catch(fallbackCopy);
+            } else {
+                fallbackCopy();
+            }
+        }
+
+        function updateGamificationUI() {
+            const levelInfo = LEVELS[userLevel - 1];
+            const nextLevelInfo = LEVELS[userLevel] || null;
+
+            // Update Header widgets
+            document.getElementById('hdr-level-name').innerText = `${levelInfo.badge} ${levelInfo.title}`;
+            document.getElementById('hdr-streak').innerText = streak;
+
+            let currentLvlMin = levelInfo.minXP;
+            let nextLvlMin = nextLevelInfo ? nextLevelInfo.minXP : currentLvlMin + 10000;
+            let levelProgressPct = ((currentXP - currentLvlMin) / (nextLvlMin - currentLvlMin)) * 100;
+            levelProgressPct = Math.min(Math.max(levelProgressPct, 0), 100);
+
+            document.getElementById('hdr-xp-progress').style.width = `${levelProgressPct}%`;
+            document.getElementById('hdr-xp-text').innerText = `${currentXP} XP`;
+
+            // Mobile Widget update
+            const mLevelName = document.getElementById('m-level-name');
+            if(mLevelName) mLevelName.innerText = `${levelInfo.badge} ${levelInfo.title}`;
+            const mXpProgress = document.getElementById('m-xp-progress');
+            if(mXpProgress) mXpProgress.style.width = `${levelProgressPct}%`;
+            const mXpText = document.getElementById('m-xp-text');
+            if(mXpText) mXpText.innerText = `${currentXP} / ${nextLvlMin} XP`;
+            const mNextLvl = document.getElementById('m-next-level');
+            if(mNextLvl) {
+                if(nextLevelInfo) {
+                    mNextLvl.innerText = `Faltam ${nextLvlMin - currentXP} XP para subir de nível`;
+                } else {
+                    mNextLvl.innerText = "Você atingiu o nível máximo de excelência!";
+                }
+            }
+        }
+
+        // SCENARIOS SELECTION & SESSION INIT
+        function backToMainMenu() {
+            // Hide all sections, show menu
+            document.getElementById('view-menu').classList.remove('hidden');
+            document.getElementById('view-topic-selector').classList.add('hidden');
+            document.getElementById('view-quiz').classList.add('hidden');
+            document.getElementById('view-results').classList.add('hidden');
+            buildTopicsGrid();
+            updateGamificationUI();
+        }
+
+        function openTopicSelector() {
+            document.getElementById('view-menu').classList.add('hidden');
+            document.getElementById('view-topic-selector').classList.remove('hidden');
+
+            const listContainer = document.getElementById('selector-topics-list');
+            listContainer.innerHTML = '';
+
+            Object.values(TOPICS).forEach(t => {
+                const checked = selectedTopicIds.includes(t.id) ? 'checked' : '';
+                const item = document.createElement('div');
+                item.className = `flex items-center space-x-3 p-3 rounded-lg border border-juridico-800 bg-juridico-950 hover:border-dourado-500 transition cursor-pointer`;
+                item.setAttribute('onclick', `toggleTopicSelectCheckbox(${t.id})`);
+                item.innerHTML = `
+                    <input type="checkbox" id="chk-topic-${t.id}" ${checked} class="w-4 h-4 text-dourado-500 bg-juridico-900 border-juridico-700 rounded focus:ring-dourado-500 focus:ring-2 pointer-events-none">
+                    <span class="text-xl">${t.icon}</span>
+                    <div class="text-left">
+                        <span class="text-xs text-dourado-400 block font-bold">${t.ref}</span>
+                        <span class="text-sm font-semibold text-white leading-tight">${t.name}</span>
+                    </div>
+                `;
+                listContainer.appendChild(item);
+            });
+        }
+
+        function toggleTopicSelectCheckbox(topicId) {
+            const chk = document.getElementById(`chk-topic-${topicId}`);
+            if (chk) {
+                chk.checked = !chk.checked;
+                if (chk.checked) {
+                    if (!selectedTopicIds.includes(topicId)) selectedTopicIds.push(topicId);
+                } else {
+                    selectedTopicIds = selectedTopicIds.filter(id => id !== topicId);
+                }
+            }
+        }
+
+        function toggleSelectAllTopics(selectAll) {
+            selectedTopicIds = [];
+            Object.values(TOPICS).forEach(t => {
+                const chk = document.getElementById(`chk-topic-${t.id}`);
+                if (chk) {
+                    chk.checked = selectAll;
+                    if (selectAll) selectedTopicIds.push(t.id);
+                }
+            });
+        }
+
+        function startFocusedQuiz() {
+            if (selectedTopicIds.length === 0) {
+                alert("Por favor, selecione ao menos um tema para praticar.");
+                return;
+            }
+            startQuiz('foco');
+        }
+
+        function startQuiz(mode) {
+            activeQuizMode = mode;
+            isReviewMode = false;
+            currentIndex = 0;
+            currentScore = 0;
+            hasAnswered = false;
+            selectedOption = null;
+            mistakesList = [];
+
+            // Reset sound
+            initAudio();
+
+            // Assemble list of questions
+            if (mode === 'completo') {
+                // All 60 questions randomized
+                sessionQuestions = shuffleArray([...QUESTIONS]);
+            } else if (mode === 'rapido') {
+                // 10 randomized questions
+                sessionQuestions = shuffleArray([...QUESTIONS]).slice(0, 10);
+            } else if (mode === 'foco') {
+                // Questions from selected topics
+                let filtered = QUESTIONS.filter(q => selectedTopicIds.includes(q.topicId));
+                sessionQuestions = shuffleArray(filtered);
+                if(sessionQuestions.length === 0) {
+                    alert("Não existem questões para os tópicos selecionados.");
+                    return;
+                }
+            }
+
+            // Move to Play View
+            document.getElementById('view-menu').classList.add('hidden');
+            document.getElementById('view-topic-selector').classList.add('hidden');
+            document.getElementById('view-results').classList.add('hidden');
+            document.getElementById('view-quiz').classList.remove('hidden');
+
+            renderCurrentQuestion();
+        }
+
+        function renderCurrentQuestion() {
+            if (currentIndex >= sessionQuestions.length) {
+                finishSession();
+                return;
+            }
+
+            hasAnswered = false;
+            selectedOption = null;
+
+            const q = sessionQuestions[currentIndex];
+            const topic = TOPICS[q.topicId];
+
+            // Reset UI
+            document.getElementById('quiz-question-index').innerText = currentIndex + 1;
+            document.getElementById('quiz-progress-text').innerText = `${currentIndex + 1} de ${sessionQuestions.length}`;
+            const progressPct = ((currentIndex) / sessionQuestions.length) * 100;
+            document.getElementById('quiz-progress-bar').style.width = `${progressPct}%`;
+            document.getElementById('quiz-score').innerText = `${currentScore} XP`;
+
+            document.getElementById('quiz-question-topic').innerText = `Tema: ${topic.name}`;
+            document.getElementById('quiz-question-ref').innerText = `${topic.ref} | Lei 9.307/96`;
+            document.getElementById('quiz-question-text').innerText = q.text;
+
+            // Load and hide hint
+            const hintBox = document.getElementById('quiz-hint-box');
+            hintBox.classList.add('hidden'); // hidden initially per question
+            const hintText = document.getElementById('quiz-hint-text');
+            hintText.innerText = q.hint || "Sem dica cadastrada para esta questão.";
+
+            // Generate option buttons
+            const optionsBox = document.getElementById('quiz-options-container');
+            optionsBox.innerHTML = '';
+
+            const letterLabel = ['A', 'B', 'C', 'D'];
+            q.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.id = `opt-${idx}`;
+                btn.setAttribute('onclick', `selectOption(${idx})`);
+                btn.className = "w-full text-left p-4 rounded-xl border border-juridico-800 bg-juridico-950/50 hover:bg-juridico-800 hover:border-dourado-400/50 transition-all flex items-start space-x-3 group relative overflow-hidden focus:outline-none";
+                btn.innerHTML = `
+                    <span class="flex-shrink-0 w-8 h-8 rounded-lg bg-juridico-800 border border-juridico-700 text-slate-300 font-bold flex items-center justify-center group-hover:bg-dourado-500 group-hover:text-juridico-950 transition-all">${letterLabel[idx]}</span>
+                    <span class="text-sm md:text-base text-slate-300 group-hover:text-white transition-all pt-1 leading-relaxed">${opt}</span>
+                `;
+                optionsBox.appendChild(btn);
+            });
+
+            // Hide feedback Area
+            const feedbackArea = document.getElementById('quiz-feedback');
+            feedbackArea.classList.add('hidden');
+            feedbackArea.className = "hidden rounded-xl p-5 border transition-all duration-300 space-y-3";
+
+            // Action button state
+            const btnAction = document.getElementById('btn-quiz-action');
+            btnAction.innerHTML = `
+                <span>Verificar Gabarito</span>
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 1.414L10.586 9H7a1 1 0 100 2h3.586l-1.293 1.293a1 1 0 101.414 1.414l3-3a1 1 0 000-1.414z" clip-rule="evenodd" />
+                </svg>
+            `;
+            btnAction.className = "px-8 py-3 bg-gradient-to-r from-dourado-500 to-dourado-600 hover:from-dourado-400 hover:to-dourado-500 text-juridico-950 font-bold rounded-xl shadow-lg transition-all flex items-center space-x-2 focus:outline-none";
+
+            // Restart timer
+            resetTimer();
+        }
+
+        // FALA MESTRE (HINT) TRIGGER
+        function showHint() {
+            if(hasAnswered) return;
+            const hintBox = document.getElementById('quiz-hint-box');
+            if (hintBox.classList.contains('hidden')) {
+                hintBox.classList.remove('hidden');
+                playTone(600, 'sine', 0.1); // Small beep for using a hint
+            }
+        }
+
+        // TIMER UTILITIES
+        function resetTimer() {
+            clearInterval(timerInterval);
+            document.getElementById('timer-box').classList.remove('bg-rose-500/10', 'border-rose-500/20', 'text-rose-400');
+            timeLeft = 45; // 45 seconds OAB pace
+            document.getElementById('quiz-timer').innerText = `${timeLeft}s`;
+
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                document.getElementById('quiz-timer').innerText = `${timeLeft}s`;
+
+                if (timeLeft <= 10) {
+                    document.getElementById('timer-box').classList.add('bg-rose-500/10', 'border-rose-500/20', 'text-rose-400');
+                }
+
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    autoSubmitOnTimeOut();
+                }
+            }, 1000);
+        }
+
+        function selectOption(index) {
+            if (hasAnswered) return;
+
+            // Remove visual select from other options
+            const q = sessionQuestions[currentIndex];
+            q.options.forEach((opt, idx) => {
+                const btn = document.getElementById(`opt-${idx}`);
+                if (btn) {
+                    btn.classList.remove('border-dourado-500', 'bg-juridico-800');
+                    btn.querySelector('span').classList.remove('bg-dourado-500', 'text-juridico-950');
+                }
+            });
+
+            selectedOption = index;
+            const chosenBtn = document.getElementById(`opt-${index}`);
+            if (chosenBtn) {
+                chosenBtn.classList.add('border-dourado-500', 'bg-juridico-800');
+                chosenBtn.querySelector('span').classList.add('bg-dourado-500', 'text-juridico-950');
+            }
+            playTone(330, 'sine', 0.05); // feedback beep
+        }
+
+        function autoSubmitOnTimeOut() {
+            if (selectedOption === null) {
+                // Force wrong select
+                selectedOption = -1;
+            }
+            handleQuizAction();
+        }
+
+        // ANSWER CONTROL & METRICS ENGINE
+        function handleQuizAction() {
+            if (!hasAnswered) {
+                if (selectedOption === null) {
+                    alert("Por favor, selecione uma das alternativas antes de verificar!");
+                    return;
+                }
+                clearInterval(timerInterval);
+                verifyAnswer();
+            } else {
+                currentIndex++;
+                renderCurrentQuestion();
+            }
+        }
+
+        function verifyAnswer() {
+            hasAnswered = true;
+            const q = sessionQuestions[currentIndex];
+            const isCorrect = selectedOption === q.correct;
+
+            // Performance & Tracking
+            totalQuestionsAnswered++;
+            if (!topicPerformance[q.topicId]) {
+                topicPerformance[q.topicId] = { total: 0, correct: 0 };
+            }
+            topicPerformance[q.topicId].total++;
+
+            const feedbackArea = document.getElementById('quiz-feedback');
+            feedbackArea.classList.remove('hidden');
+
+            const optionsBox = document.getElementById('quiz-options-container');
+
+            // Apply style overrides based on answer
+            if (isCorrect) {
+                totalCorrectAnswers++;
+                topicPerformance[q.topicId].correct++;
+                streak++;
+                if (streak > maxStreak) maxStreak = streak;
+
+                // Points formulas
+                let xpGain = 100;
+                let speedBonus = 0;
+                let streakBonus = Math.min((streak - 1) * 20, 100);
+
+                if (timeLeft > 25) {
+                    speedBonus = 50; // Super fast response
+                } else if (timeLeft > 15) {
+                    speedBonus = 25;
+                }
+
+                const totalGain = xpGain + speedBonus + streakBonus;
+                currentScore += totalGain;
+                addXP(totalGain);
+
+                // UI adjustments
+                feedbackArea.classList.add('bg-emerald-500/10', 'border-emerald-500/20', 'text-emerald-300');
+                document.getElementById('quiz-feedback-icon').innerText = "✅";
+                document.getElementById('quiz-feedback-title').innerText = `Acerto Espectacular! (+${totalGain} XP)`;
+
+                // Explanations modifiers
+                let explanationText = q.explanation;
+                if(speedBonus > 0) explanationText += `\n\n*Bônus Celeridade*: Resposta em tempo excepcional! (+${speedBonus} XP)`;
+                if(streakBonus > 0) explanationText += `\n\n*Bônus Combustão (Streak x${streak})*: 🔥 Você está pegando fogo! (+${streakBonus} XP)`;
+                
+                document.getElementById('quiz-feedback-explanation').innerText = explanationText;
+
+                // Highlight correct button
+                const correctBtn = document.getElementById(`opt-${q.correct}`);
+                if (correctBtn) {
+                    correctBtn.className = "w-full text-left p-4 rounded-xl border border-emerald-500 bg-emerald-950/20 flex items-start space-x-3 transition-all";
+                    correctBtn.querySelector('span').className = "flex-shrink-0 w-8 h-8 rounded-lg bg-emerald-500 text-juridico-950 font-bold flex items-center justify-center";
+                }
+
+                playCorrectSound();
+            } else {
+                streak = 0; // Reset streak
+                mistakesList.push(q); // Save to study later
+
+                feedbackArea.classList.add('bg-rose-500/10', 'border-rose-500/20', 'text-rose-300');
+                document.getElementById('quiz-feedback-icon').innerText = "❌";
+                document.getElementById('quiz-feedback-title').innerText = "Resposta Incorreta";
+                document.getElementById('quiz-feedback-explanation').innerText = q.explanation;
+
+                // Highlight correct button in green
+                const correctBtn = document.getElementById(`opt-${q.correct}`);
+                if (correctBtn) {
+                    correctBtn.className = "w-full text-left p-4 rounded-xl border border-emerald-500/50 bg-emerald-950/10 flex items-start space-x-3 transition-all";
+                    correctBtn.querySelector('span').className = "flex-shrink-0 w-8 h-8 rounded-lg bg-emerald-500/50 text-white font-bold flex items-center justify-center";
+                }
+
+                // Highlight wrong selection in red
+                if (selectedOption !== -1) {
+                    const wrongBtn = document.getElementById(`opt-${selectedOption}`);
+                    if (wrongBtn) {
+                        wrongBtn.className = "w-full text-left p-4 rounded-xl border border-rose-500 bg-rose-950/20 flex items-start space-x-3 transition-all";
+                        wrongBtn.querySelector('span').className = "flex-shrink-0 w-8 h-8 rounded-lg bg-rose-500 text-white font-bold flex items-center justify-center";
+                    }
+                }
+
+                playIncorrectSound();
+            }
+
+            // Save Progress
+            saveStateToLocalStorage();
+
+            // Toggle Navigation Button
+            const btnAction = document.getElementById('btn-quiz-action');
+            btnAction.innerHTML = `
+                <span>Próxima Questão</span>
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 1.414L10.586 9H7a1 1 0 100 2h3.586l-1.293 1.293a1 1 0 101.414 1.414l3-3a1 1 0 000-1.414z" clip-rule="evenodd" />
+                </svg>
+            `;
+            btnAction.className = "px-8 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-bold rounded-xl shadow-lg hover:from-blue-400 hover:to-indigo-500 transition-all flex items-center space-x-2 focus:outline-none";
+        }
+
+        function abortSession() {
+            if (confirm("Seu progresso da rodada ativa será perdido. Voltar para o menu?")) {
+                clearInterval(timerInterval);
+                backToMainMenu();
+            }
+        }
+
+        // FINISH SCREEN & ANALYTICS INTERFACE
+        function finishSession() {
+            clearInterval(timerInterval);
+            document.getElementById('view-quiz').classList.add('hidden');
+            document.getElementById('view-results').classList.remove('hidden');
+
+            const total = sessionQuestions.length;
+            const correctCount = total - mistakesList.length;
+            const accuracy = total > 0 ? Math.round((correctCount / total) * 100) : 0;
+
+            document.getElementById('res-accuracy').innerText = `${accuracy}%`;
+            document.getElementById('res-score').innerText = `${correctCount} / ${total}`;
+            document.getElementById('res-xp-gained').innerText = `+${currentScore} XP`;
+            document.getElementById('res-max-streak').innerText = `${maxStreak} 🔥`;
+
+            // Display "Review mistakes" button conditionally
+            const btnReview = document.getElementById('btn-review-mistakes');
+            if (mistakesList.length > 0) {
+                btnReview.classList.remove('hidden');
+                btnReview.innerText = `Rever Erros (${mistakesList.length})`;
+            } else {
+                btnReview.classList.add('hidden');
+            }
+
+            // Build Topic Breakdown Stats
+            buildResultsBreakdown();
+
+            // Build dynamic rewards list
+            buildAchievementsList(accuracy, total);
+
+            // Confetti party if 100%
+            if (accuracy === 100) {
+                confetti({
+                    particleCount: 200,
+                    spread: 90,
+                    origin: { y: 0.5 }
+                });
+            }
+        }
+
+        function buildResultsBreakdown() {
+            const container = document.getElementById('res-topics-breakdown');
+            container.innerHTML = '';
+
+            // Calculate accuracy on the current session per topic
+            const sessionPerformance = {};
+            sessionQuestions.forEach((q, idx) => {
+                if(!sessionPerformance[q.topicId]) {
+                    sessionPerformance[q.topicId] = { total: 0, correct: 0 };
+                }
+                sessionPerformance[q.topicId].total++;
+                const answeredCorrectly = !mistakesList.some(m => m.text === q.text);
+                if (answeredCorrectly) {
+                    sessionPerformance[q.topicId].correct++;
+                }
+            });
+
+            Object.values(TOPICS).forEach(t => {
+                let statStr = 'Não cobrado nesta sessão';
+                let pct = 0;
+                let bgBarColor = 'bg-slate-700';
+
+                if (sessionPerformance[t.id]) {
+                    const correct = sessionPerformance[t.id].correct;
+                    const total = sessionPerformance[t.id].total;
+                    pct = Math.round((correct / total) * 100);
+                    statStr = `${correct} de ${total} acertadas (${pct}%)`;
+                    bgBarColor = pct >= 75 ? 'bg-gradient-to-r from-emerald-500 to-teal-400' : pct >= 40 ? 'bg-gradient-to-r from-amber-500 to-orange-400' : 'bg-gradient-to-r from-rose-500 to-red-400';
+                } else if(topicPerformance[t.id]) {
+                    const correct = topicPerformance[t.id].correct;
+                    const total = topicPerformance[t.id].total;
+                    pct = Math.round((correct / total) * 100);
+                    statStr = `Histórico Geral: ${pct}%`;
+                    bgBarColor = 'bg-juridico-500';
+                }
+
+                const item = document.createElement('div');
+                item.className = "space-y-1.5 p-3 rounded-lg bg-juridico-950 border border-juridico-800";
+                item.innerHTML = `
+                    <div class="flex justify-between items-center text-xs md:text-sm">
+                        <span class="font-bold text-white">${t.icon} ${t.name}</span>
+                        <span class="text-slate-400 text-xs">${statStr}</span>
+                    </div>
+                    <div class="w-full bg-juridico-900 rounded-full h-2 overflow-hidden">
+                        <div class="${bgBarColor} h-full transition-all duration-500" style="width: ${pct}%"></div>
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function buildAchievementsList(accuracy, total) {
+            const container = document.getElementById('res-achievements');
+            container.innerHTML = '';
+
+            const addBadge = (title, desc, status, bg) => {
+                const item = document.createElement('div');
+                item.className = `p-3 rounded-lg border ${status ? 'border-dourado-500/35 bg-juridico-950 text-white' : 'border-juridico-850 bg-juridico-950/30 text-slate-500'} flex items-center space-x-3`;
+                item.innerHTML = `
+                    <span class="text-2xl filter ${status ? '' : 'grayscale'}">${bg}</span>
+                    <div>
+                        <span class="text-xs font-bold block ${status ? 'text-dourado-400' : 'text-slate-500'}">${title}</span>
+                        <span class="text-[10px] text-slate-400">${desc}</span>
+                    </div>
+                `;
+                container.appendChild(item);
+            };
+
+            // Checkers
+            addBadge("Soberano Arbitral", "Acertou 100% de uma sessão.", accuracy === 100, "🎖️");
+            addBadge("Velocidade Processual", "Respondeu no tempo recorde.", timeLeft > 25, "⚡");
+            addBadge("Carga Pesada", "Encarou a maratona completa.", total >= 50, "🏔️");
+            addBadge("Sequência Lendária", "Alcançou um combo acima de 5.", maxStreak >= 5, "🔥");
+        }
+
+        function restartCurrentQuizMode() {
+            startQuiz(activeQuizMode);
+        }
+
+        function startMistakesReview() {
+            if (mistakesList.length === 0) return;
+            sessionQuestions = [...mistakesList];
+            activeQuizMode = 'foco';
+            isReviewMode = true;
+            currentIndex = 0;
+            currentScore = 0;
+            hasAnswered = false;
+            selectedOption = null;
+            mistakesList = []; // Clean up for next round
+
+            document.getElementById('view-results').classList.add('hidden');
+            document.getElementById('view-quiz').classList.remove('hidden');
+            renderCurrentQuestion();
+        }
+
+        // SHUFFLE HELPER
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+    </script>
+</body>
+</html>
